@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "AntonLilleby.xp-freemarker-formatter",
+    "YoavBls.pretty-ts-errors",
+    "mxsdev.typescript-explorer"
+  ]
+}

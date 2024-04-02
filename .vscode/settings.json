@@ -1,0 +1,12 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.sortImports": "always"
+  },
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.configPath": ".prettierrc",
+  "prettier.ignorePath": ".prettierignore",
+  "prettier.prettierPath": "./node_modules/prettier",
+  "[ftl]": {
+    "editor.defaultFormatter": "AntonLilleby.xp-freemarker-formatter"
+  }
+}
