@@ -1,5 +1,5 @@
 {
-  "name": "poc-mock-record-customizations",
+  "name": "suitescript-utils",
   "version": "1.0.0",
   "scripts": {
     "build": "npx tsc",
