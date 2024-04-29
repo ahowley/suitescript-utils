@@ -1,36 +1,35 @@
-# Account Customization Project Template
+# SuiteScript Utils
 
-This repository serves as a template for an Account Customization project, and
-can be used as a foundation for new projects.
+This project is intended for reuse by other account customization projects.
 
-## SuiteScript 2.1
+## Use in Account Customization project
 
-To take full advantage of TypeScript and modern ECMAScript language features, it
-should be standard to use SuiteScript 2.1. package.json is configured for
-SuiteScript 2.1 and ESNext features.
+- Add this repo to node_modules
 
-## TypeScript
+  ```bash
+  npm i git@ssh.dev.azure.com:v3/NGRP/NetSuite%20Sandbox/suitecloud-utils
+  ```
 
-[TypeScript](https://www.typescriptlang.org/) enables all the benefits of static
-type-checking in a modern, module-based JavaScript environment. tsconfig.json is
-configured in this project to compile into the example-directory folder.
+- Add path to tsconfig.json
 
-## Unit Testing with Jest
+  ```json
+  {
+    "compilerOptions": {
+      ...
+      "paths": {
+        ...
+        "utils": [
+          "node_modules/suitescript-utils"
+        ]
+      }
+    }
+  }
+  ```
 
-[Jest](https://jestjs.io/) is a JavaScript testing framework supported by
-NetSuite directly for SuiteScript unit testing. A basic example is included here
-in the \_\_tests\_\_ directory for how mocking data and functions works in Jest.
-While Jest supports TypeScript, using it with NetSuite's package for unit
-testing can prove to be a bit of a headache, so vanilla JS is used here for
-simplicity & ease of development. That said, unit testing can have limited
-utility with SuiteScript due to how heavily mocked all behavior winds up being,
-and the way errors are thrown in SuiteScript.
-
-## Tools
-
-- [Visual Studio Code](https://code.visualstudio.com/)
-- [Node.js](https://nodejs.org/en/download/package-manager)
-- [SuiteCloud CLI](https://docs.oracle.com/en/cloud/saas/netsuite/ns-online-help/chapter_1558708800.html#SuiteCloud-CLI-for-Node.js-Guide)
+- Import module members
+  ```typescript
+  import { InternalId } from "utils/common";
+  ```
 
 ## Setup
 
