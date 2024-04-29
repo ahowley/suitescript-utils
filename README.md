@@ -7,7 +7,7 @@ This project is intended for reuse by other account customization projects.
 - Add this repo to node_modules
 
   ```bash
-  npm i git@ssh.dev.azure.com:v3/NGRP/NetSuite%20Sandbox/suitecloud-utils
+  npm i git@ssh.dev.azure.com:v3/NGRP/NetSuite%20Sandbox/suitescript-utils
   ```
 
 - Add path to tsconfig.json
