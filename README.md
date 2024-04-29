@@ -19,7 +19,10 @@ This project is intended for reuse by other account customization projects.
       "paths": {
         ...
         "utils": [
-          "node_modules/suitescript-utils"
+          "node_modules/suitescript-utils/src/TypeScripts"
+        ],
+        "utils/*": [
+          "node_modules/suitescript-utils/src/TypeScripts/*"
         ]
       }
     }
