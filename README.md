@@ -18,10 +18,10 @@ This project is intended for reuse by other account customization projects.
       ...
       "paths": {
         ...
-        "utils": [
+        "SuiteScripts/utils": [
           "node_modules/suitescript-utils/src/TypeScripts"
         ],
-        "utils/*": [
+        "SuiteScripts/utils/*": [
           "node_modules/suitescript-utils/src/TypeScripts/*"
         ]
       }
@@ -31,7 +31,7 @@ This project is intended for reuse by other account customization projects.
 
 - Import module members
   ```typescript
-  import { InternalId } from "utils/common";
+  import { InternalId } from "SuiteScripts/utils/common";
   ```
 
 ## Setup
