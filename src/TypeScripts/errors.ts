@@ -33,3 +33,27 @@ export function logAndSuppressError(logTitle: string, err: error.SuiteScriptErro
 
   return false;
 }
+
+function createAndThrowError(name: string, message: string) {
+  const err = error.create({ name, message });
+  throw err;
+}
+
+export const throwError = {
+  /**
+   * Raise this type of error when a function, object property, or other behavior expects a value of a
+   * different type or shape than what was provided to it, i.e. when validating unknown or untyped values.
+   *
+   * @param invalidValueName - The name of the variable, parameter, property, etc. that was assigned an
+   * invalid value.
+   * @param invalidValue - The value that was erroneously assigned.
+   * @param message - Helpful guidance for a developer attempting to correct this error.
+   */
+  wrongType: (invalidValueName: string, invalidValue: any, message: string) => {
+    const invalidValueString = typeof invalidValue === "string" ? invalidValue : JSON.stringify(invalidValue);
+    createAndThrowError(
+      "NG_TYPE_ERROR",
+      `The value ${invalidValueString} provided to ${invalidValueName} is invalid: ${message}`,
+    );
+  },
+};
