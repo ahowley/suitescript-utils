@@ -9,16 +9,7 @@ import record, { Field, Type as RecordType } from "N/record";
 import serverWidget, { FieldType } from "N/ui/serverWidget";
 import { throwError } from "./errors";
 
-type FieldId = `custpage_${string}`;
-type TabId = `custpage_tab_${string}`;
-
-/**
- * This function creates an ID for use in custom fields built via N/ui.
- *
- * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
- * letters and underscores.
- */
-function fieldId(slug: string): FieldId {
+function validateNsIdSlug(slug: string): string {
   const invalidCharacters = slug.match(/^[a-z_]/);
   if (invalidCharacters[0] !== null) {
     throwError.wrongType(
@@ -27,7 +18,52 @@ function fieldId(slug: string): FieldId {
       "A custom form element ID can only consist of lowercase letters and underscores.",
     );
   }
-  return `custpage_${slug}`;
+
+  return slug;
+}
+
+export type FieldId = `custpage_fld_${string}`;
+/**
+ * This function creates an ID for use in custom fields built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+function fieldId(slug: string): FieldId {
+  return `custpage_fld_${validateNsIdSlug(slug)}`;
+}
+
+export type TabId = `custpage_tab_${string}`;
+/**
+ * This function creates an ID for use in custom tabs built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export function tabId(slug: string): TabId {
+  return `custpage_tab_${validateNsIdSlug(slug)}`;
+}
+
+export type FieldGroupId = `custpage_grp_${string}`;
+/**
+ * This function creates an ID for use in custom field groups built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export function fieldGroupId(slug: string): FieldGroupId {
+  return `custpage_grp_${validateNsIdSlug(slug)}`;
+}
+
+export type SublistId = `custpage_lst_${string}`;
+/**
+ * This function creates an ID for use in custom sublists built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export function sublistId(slug: string): SublistId {
+  return `custpage_lst_${validateNsIdSlug(slug)}`;
 }
 
 type UniversalFieldOptions = {
@@ -193,3 +229,5 @@ export const field: { [fieldType: string]: FieldFunction } = {
     };
   },
 };
+
+// export function createPage(pageOptions)
