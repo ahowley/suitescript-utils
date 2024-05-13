@@ -155,18 +155,11 @@ type FieldOptions =
   | DateFieldOptions
   | SelectFieldOptions
   | CustomSelectFieldOptions;
-/**
- * Generate  field properties for a field that will go in a custom form, sublist, tab, or field group.
- *
- * @param id - A new, unique ID for this field, generated with the fieldId function.
- * @param label - The human-readable field name that will appear in the UI.
- */
-type FieldFunction = (id: FieldId, label: string, ...options: any) => FieldOptions;
 
 /**
  * Generate field properties for a field that will go in a custom form, sublist, tab, or field group.
  */
-export const field: { [fieldType: string]: FieldFunction } = {
+export const field = {
   /**
    * @param characterLimit - Either 300, 4,000, or 100,000, which are the character limits for NetSuite's
    * Free-Form Text, Text Area, and Long Text field types, respectively.
