@@ -1,6 +1,6 @@
 {
   "name": "suitescript-utils",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "build": "npx tsc",
     "test": "npx tsc && jest",
