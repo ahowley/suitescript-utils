@@ -19,8 +19,8 @@ import serverWidget, {
 import { throwError } from "./errors";
 
 function validateNsIdSlug(slug: string): string {
-  const invalidCharacters = slug.match(/^[a-z_]/);
-  if (invalidCharacters[0] !== null) {
+  const invalidCharacters = slug.match(/[^a-z_]/);
+  if (invalidCharacters !== null) {
     throwError.wrongType(
       "slug",
       slug,
