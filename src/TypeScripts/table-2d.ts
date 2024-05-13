@@ -10,7 +10,7 @@ import { FieldValue } from "@hitc/netsuite-types/N/record";
 
 export class Table2d {
   #iteratorIndex: number;
-  #columnIndecesCached: Map<string, number>;
+  #columnIndicesCached: Map<string, number>;
   columns: string[];
   rows: FieldValue[][];
 
@@ -18,16 +18,16 @@ export class Table2d {
     this.columns = columns;
     this.rows = rows;
     this.#iteratorIndex = -1;
-    this.#columnIndecesCached = new Map();
+    this.#columnIndicesCached = new Map();
   }
 
   getColumnIndexByName(label: string) {
-    let index = this.#columnIndecesCached.get(label);
+    let index = this.#columnIndicesCached.get(label);
 
     if (index === undefined) {
       index = this.columns.findIndex(l => l === label);
       if (index === -1) return null;
-      this.#columnIndecesCached.set(label, index);
+      this.#columnIndicesCached.set(label, index);
     }
 
     return index;
@@ -39,7 +39,7 @@ export class Table2d {
 
   get(row: number, label: string) {
     const col = this.getColumnIndexByName(label);
-    if (label === null) return null;
+    if (label === null || col === null) return null;
     return this.rows[row][col];
   }
 
@@ -54,15 +54,15 @@ export class Table2d {
     }
 
     const unionRows = [];
-    const thisColumnIndeces = unionColumns.map(col => this.getColumnIndexByName(col));
+    const thisColumnIndices = unionColumns.map(col => this.getColumnIndexByName(col));
     for (const row of this) {
-      const filteredRow = row.filter((_, i) => thisColumnIndeces.includes(i));
+      const filteredRow = row.filter((_, i) => thisColumnIndices.includes(i));
       unionRows.push(filteredRow);
     }
 
-    const otherColumnIndeces = unionColumns.map(col => table.getColumnIndexByName(col));
+    const otherColumnIndices = unionColumns.map(col => table.getColumnIndexByName(col));
     for (const row of table) {
-      const filteredRow = row.filter((_, i) => otherColumnIndeces.includes(i));
+      const filteredRow = row.filter((_, i) => otherColumnIndices.includes(i));
       unionRows.push(filteredRow);
     }
 
@@ -75,30 +75,36 @@ export class Table2d {
 
   summarize(groupColumns: string[], sumColumns: string[], countColumns: string[]) {
     const hashedRows = new Map<string, FieldValue[]>();
-    const groupColumnIndeces = groupColumns.map(col => this.getColumnIndexByName(col));
-    const columnIndecesToSum = sumColumns.map(col => this.getColumnIndexByName(col));
-    const columnIndecesToCount = countColumns.map(col => this.getColumnIndexByName(col));
+    const groupColumnIndices = groupColumns
+      .map(col => this.getColumnIndexByName(col))
+      .filter(col => col !== null) as number[];
+    const columnIndicesToSum = sumColumns
+      .map(col => this.getColumnIndexByName(col))
+      .filter(col => col !== null) as number[];
+    const columnIndicesToCount = countColumns
+      .map(col => this.getColumnIndexByName(col))
+      .filter(col => col !== null) as number[];
 
     for (let i = 0; i < this.rows.length; i++) {
-      const groupHash = groupColumnIndeces.map(col => JSON.stringify(this.rows[i][col])).join();
+      const groupHash = groupColumnIndices.map(col => JSON.stringify(this.rows[i][col!])).join();
       const hashedRow = hashedRows.get(groupHash);
 
       const currentRow = this.rows[i];
       if (!!hashedRow) {
-        for (const sumColumnIndex of columnIndecesToSum) {
+        for (const sumColumnIndex of columnIndicesToSum) {
           const addToSum = parseFloat((currentRow[sumColumnIndex] as string) ?? "0");
           if (!isNaN(addToSum)) {
             hashedRow[sumColumnIndex] = (hashedRow[sumColumnIndex] as number) + addToSum;
           }
         }
-        for (const countColumnIndex of columnIndecesToCount) {
+        for (const countColumnIndex of columnIndicesToCount) {
           (hashedRow[countColumnIndex] as number) += 1;
         }
       } else {
         hashedRows.set(
           groupHash,
           currentRow.map((val, i) => {
-            if (columnIndecesToSum.includes(i)) {
+            if (columnIndicesToSum.includes(i)) {
               const parsedVal = parseFloat((val as string) ?? "0");
               return isNaN(parsedVal) ? 0 : parsedVal;
             }
@@ -109,15 +115,15 @@ export class Table2d {
     }
 
     const summaryColumns = [...groupColumns, ...sumColumns, ...countColumns];
-    const allSummaryIndeces = [
+    const allSummaryIndices = [
       ...groupColumns.map(col => this.getColumnIndexByName(col)),
-      ...columnIndecesToSum,
-      ...columnIndecesToCount,
+      ...columnIndicesToSum,
+      ...columnIndicesToCount,
     ];
 
     const summarizedRows: FieldValue[][] = [];
     for (const summaryRow of hashedRows.values()) {
-      summarizedRows.push(summaryRow.filter((_, i) => allSummaryIndeces.includes(i)));
+      summarizedRows.push(summaryRow.filter((_, i) => allSummaryIndices.includes(i)));
     }
 
     return new Table2d(summaryColumns, summarizedRows);
@@ -249,7 +255,7 @@ export class Table2dJoin {
       for (let j = 0; j < this.table2.length(); j++) {
         const value2 = this.table2.get(j, table2Column);
         if (value1 === value2 && value1 !== null) {
-          joinedValues.push([...this.table1.at(i), ...this.table2.at(i)]);
+          joinedValues.push([...(this.table1.at(i) ?? []), ...(this.table2.at(i) ?? [])]);
           continue;
         }
       }
