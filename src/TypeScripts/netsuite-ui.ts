@@ -5,8 +5,16 @@
  * This module contains functionality for building NetSuite user interfaces using N/ui.
  */
 
-import record, { Field, Type as RecordType } from "N/record";
-import serverWidget, { FieldType } from "N/ui/serverWidget";
+import { Type as RecordType } from "N/record";
+import serverWidget, {
+  AddButtonOptions,
+  AddFieldGroupOptions,
+  AddPageLinkOptions,
+  AddSublistOptions,
+  CreateAssistantOptions,
+  FieldType,
+  Form,
+} from "N/ui/serverWidget";
 import { throwError } from "./errors";
 
 function validateNsIdSlug(slug: string): string {
@@ -29,7 +37,7 @@ export type FieldId = `custpage_fld_${string}`;
  * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
  * letters and underscores.
  */
-function fieldId(slug: string): FieldId {
+export function fieldId(slug: string): FieldId {
   return `custpage_fld_${validateNsIdSlug(slug)}`;
 }
 
@@ -66,6 +74,28 @@ export function sublistId(slug: string): SublistId {
   return `custpage_lst_${validateNsIdSlug(slug)}`;
 }
 
+/**
+ * This function creates an ID for use in custom buttons built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export type ButtonId = `custpage_but_${string}`;
+export function buttonId(slug: string): ButtonId {
+  return `custpage_but_${validateNsIdSlug(slug)}`;
+}
+
+/**
+ * This function creates an ID for use in custom page links built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export type PageLinkId = `custpage_lnk_${string}`;
+export function pageLinkId(slug: string): PageLinkId {
+  return `custpage_lnk_${validateNsIdSlug(slug)}`;
+}
+
 type UniversalFieldOptions = {
   id: FieldId;
   label: string;
@@ -96,14 +126,13 @@ type DateFieldOptions = UniversalFieldOptions & {
 };
 type SelectFieldOptions = UniversalFieldOptions & {
   type: FieldType.SELECT | FieldType.MULTISELECT;
-  source: RecordType;
+  source: string;
 };
 type CustomSelectFieldOptions = UniversalFieldOptions & {
   type: FieldType.SELECT | FieldType.MULTISELECT;
 };
 
 type FieldOptions =
-  | UniversalFieldOptions
   | TextFieldOptions
   | HtmlFieldOptions
   | EmailFieldOptions
@@ -207,12 +236,12 @@ export const field: { [fieldType: string]: FieldFunction } = {
    * use field.customSelect() instead.
    * @param multiselect - whether to allow multiple selections from the options at once.
    */
-  select: (id: FieldId, label: string, recordType: RecordType, multiselect: boolean): SelectFieldOptions => {
+  select: (id: FieldId, label: string, recordType: RecordType | string, multiselect: boolean): SelectFieldOptions => {
     return {
       id,
       label,
       type: multiselect ? (FieldType.MULTISELECT as FieldType.MULTISELECT) : (FieldType.SELECT as FieldType.SELECT),
-      source: recordType,
+      source: recordType as string,
     };
   },
   /**
@@ -230,4 +259,51 @@ export const field: { [fieldType: string]: FieldFunction } = {
   },
 };
 
-// export function createPage(pageOptions)
+type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
+type NgAddTabOptions = Omit<AddFieldGroupOptions, "id"> & { id: TabId };
+type NgAddSublistOptions = Omit<AddSublistOptions, "id"> & { id: SublistId };
+type NgAddButtonOptions = Omit<AddButtonOptions, "id"> & { id: ButtonId };
+type NgAddPageLinkOptions = Omit<AddPageLinkOptions, "id"> & { id: PageLinkId };
+
+export type PageElements = {
+  /** An array (in order of appearance) of field options for adding fields to the body of the form. */
+  bodyFields?: FieldOptions[];
+  /** An array (in order of appearance) of field group options for adding field groups to the body of the form. */
+  fieldGroups?: NgAddFieldGroupOptions[];
+  /** An array (in order of appearance) of tabs to add to the body of the form. */
+  tabs?: NgAddTabOptions[];
+  /** An array (in order of appearance) of sublists to add to a form. */
+  sublists?: { sublist: NgAddSublistOptions; fields: FieldOptions[]; buttons?: NgAddButtonOptions[] }[];
+  /** An array (in order of appearance) of custom page links to add to a form. */
+  pageLinks?: NgAddPageLinkOptions[];
+  /** Optionally attach a client script, along with buttons that trigger custom functions there, to this form. */
+  clientScript?: {
+    path: string;
+    buttons?: NgAddButtonOptions[];
+  };
+};
+export function createPage(
+  options: CreateAssistantOptions,
+  { bodyFields, fieldGroups, tabs, sublists, pageLinks, clientScript }: PageElements,
+): Form {
+  const form = serverWidget.createForm(options);
+  pageLinks?.forEach(linkOptions => form.addPageLink(linkOptions));
+  tabs?.forEach(tabOptions => form.addTab(tabOptions));
+  fieldGroups?.forEach(groupOptions => form.addFieldGroup(groupOptions));
+  bodyFields?.forEach(fieldOptions => form.addField(fieldOptions));
+
+  if (!!clientScript) {
+    form.clientScriptModulePath = clientScript.path;
+    clientScript.buttons?.forEach(buttonOptions => form.addButton(buttonOptions));
+  }
+
+  if (!!sublists) {
+    for (const { sublist: sublistOptions, fields, buttons } of sublists) {
+      const sublist = form.addSublist(sublistOptions);
+      fields.forEach(fieldOptions => sublist.addField(fieldOptions));
+      buttons?.forEach(buttonOptions => sublist.addButton(buttonOptions));
+    }
+  }
+
+  return form;
+}
