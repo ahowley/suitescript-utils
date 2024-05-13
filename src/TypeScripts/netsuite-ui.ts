@@ -339,7 +339,7 @@ function createContainerWithFields(
     subcontainer = step.id;
   } else if (!!sublist) {
     container = page.addSublist(sublist);
-    buttons.forEach(button => (container as Sublist).addButton(button));
+    buttons?.forEach(button => (container as Sublist).addButton(button));
   } else {
     throwError.shouldBeUnreachable(
       "createContainerWithFields was supposed to get at least one of a tab, group, step, or sublist.",
@@ -375,7 +375,7 @@ export function createPage(
   tabs?.forEach(tab => createContainerWithFields(form, tab));
   fieldGroups?.forEach(group => createContainerWithFields(form, group));
   sublists?.forEach(sublist => createContainerWithFields(form, sublist));
-  addFieldsToContainer(form, fields, requiredFieldIds);
+  addFieldsToContainer(form, fields ?? [], requiredFieldIds ?? []);
 
   return form;
 }
@@ -398,7 +398,7 @@ export function createAssistantPage(
 
   steps.forEach(step => createContainerWithFields(assistant, step));
   sublists?.forEach(sublist => createContainerWithFields(assistant, sublist));
-  addFieldsToContainer(assistant, fields, requiredFieldIds);
+  addFieldsToContainer(assistant, fields ?? [], requiredFieldIds ?? []);
 
   return assistant;
 }

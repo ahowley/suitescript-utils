@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "newLine": "LF",
     "baseUrl": ".",
+    "strict": true,
     "lib": [
       "ESNext",
       "dom"
