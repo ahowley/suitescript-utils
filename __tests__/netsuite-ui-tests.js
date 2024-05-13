@@ -9,8 +9,8 @@ beforeEach(() => {
 
 describe("validating field and form custom ids are in the right format", () => {
   it("should allow lowercase letters and underscores", () => {
-    const id = fieldId("test");
-    const expectedId = "custpage_fld_test";
+    const id = fieldId("test_id");
+    const expectedId = "custpage_fld_test_id";
     expect(id).toBe(expectedId);
   });
 
