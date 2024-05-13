@@ -56,4 +56,16 @@ export const throwError = {
       `The value ${invalidValueString} provided to ${invalidValueName} is invalid: ${message}`,
     );
   },
+  /**
+   * Raise this type of error when code that was written with the understanding that it would be unreachable
+   * is reached and executed.
+   * @param description - A description of where the code is and anything else that could be helpful for a
+   * developer encountering this error.
+   */
+  shouldBeUnreachable: (description: string) => {
+    createAndThrowError(
+      "UNREACHABLE_REACHED",
+      `Code intended to be unreachable was reached and executed: ${description}`,
+    );
+  },
 };
