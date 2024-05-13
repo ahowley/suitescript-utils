@@ -11,9 +11,10 @@ import serverWidget, {
   AddFieldGroupOptions,
   AddPageLinkOptions,
   AddSublistOptions,
-  CreateAssistantOptions,
+  Assistant,
   FieldType,
   Form,
+  Sublist,
 } from "N/ui/serverWidget";
 import { throwError } from "./errors";
 
@@ -61,6 +62,17 @@ export type FieldGroupId = `custpage_grp_${string}`;
  */
 export function fieldGroupId(slug: string): FieldGroupId {
   return `custpage_grp_${validateNsIdSlug(slug)}`;
+}
+
+export type AssistantStepId = `custpage_stp_${string}`;
+/**
+ * This function creates an ID for use in custom assistant steps built via N/ui.
+ *
+ * @param slug - a unique identifier for this form element, consisting exclusively of lowercase
+ * letters and underscores.
+ */
+export function assistantStepId(slug: string): AssistantStepId {
+  return `custpage_stp_${validateNsIdSlug(slug)}`;
 }
 
 export type SublistId = `custpage_lst_${string}`;
@@ -259,51 +271,141 @@ export const field: { [fieldType: string]: FieldFunction } = {
   },
 };
 
-type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
 type NgAddTabOptions = Omit<AddFieldGroupOptions, "id"> & { id: TabId };
+type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
+type NgAddStepOptions = Omit<AddFieldGroupOptions, "id"> & { id: AssistantStepId };
 type NgAddSublistOptions = Omit<AddSublistOptions, "id"> & { id: SublistId };
 type NgAddButtonOptions = Omit<AddButtonOptions, "id"> & { id: ButtonId };
 type NgAddPageLinkOptions = Omit<AddPageLinkOptions, "id"> & { id: PageLinkId };
 
+type ContainerWithFieldOptions = { fields: FieldOptions[]; requiredFieldIds: FieldId[] };
+type TabWithFieldsOptions = ContainerWithFieldOptions & { tab: NgAddTabOptions };
+type FieldGroupWithFieldsOptions = ContainerWithFieldOptions & { group: NgAddFieldGroupOptions };
+type AssistantStepWithFieldsOptions = ContainerWithFieldOptions & { step: NgAddStepOptions };
+type SublistWithFieldsOptions = ContainerWithFieldOptions & {
+  sublist: NgAddSublistOptions;
+  buttons?: NgAddButtonOptions[];
+};
+
+function addFieldsToContainer(
+  container: Form | Assistant | Sublist,
+  fields: FieldOptions[],
+  requiredFieldIds: FieldId[],
+  subcontainerId?: TabId | FieldGroupId | AssistantStepId,
+) {
+  fields.forEach(field => {
+    const fieldOptions = !!subcontainerId ? { container: subcontainerId, ...field } : field;
+    const added = container.addField(fieldOptions);
+    if (requiredFieldIds.includes(added.id as FieldId)) {
+      added.isMandatory = true;
+    }
+  });
+}
+
+function createContainerWithFields(container: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
+function createContainerWithFields(
+  container: Form,
+  { group, fields, requiredFieldIds }: FieldGroupWithFieldsOptions,
+): void;
+function createContainerWithFields(
+  container: Assistant,
+  { step, fields, requiredFieldIds }: AssistantStepWithFieldsOptions,
+): void;
+function createContainerWithFields(
+  container: Assistant | Form,
+  { sublist, fields, requiredFieldIds, buttons }: SublistWithFieldsOptions,
+): void;
+function createContainerWithFields(
+  page: Assistant | Form,
+  {
+    tab,
+    group,
+    step,
+    sublist,
+    fields,
+    requiredFieldIds,
+    buttons,
+  }: ContainerWithFieldOptions & {
+    tab?: NgAddTabOptions;
+    group?: NgAddFieldGroupOptions;
+    step?: NgAddStepOptions;
+    sublist?: NgAddSublistOptions;
+    buttons?: NgAddButtonOptions[];
+  },
+) {
+  let container: Assistant | Form | Sublist = page;
+  let subcontainer: TabId | FieldGroupId | AssistantStepId | undefined;
+  if (!!tab) {
+    (page as Form).addTab(tab);
+    subcontainer = tab.id;
+  } else if (!!group) {
+    (page as Form).addFieldGroup(group);
+    subcontainer = group.id;
+  } else if (!!step) {
+    (page as Assistant).addStep(step);
+    subcontainer = step.id;
+  } else if (!!sublist) {
+    container = page.addSublist(sublist);
+    buttons.forEach(button => (container as Sublist).addButton(button));
+  } else {
+    throwError.shouldBeUnreachable(
+      "createContainerWithFields was supposed to get at least one of a tab, group, step, or sublist.",
+    );
+  }
+
+  addFieldsToContainer(container, fields, requiredFieldIds, subcontainer);
+}
+
 export type PageElements = {
-  /** An array (in order of appearance) of field options for adding fields to the body of the form. */
-  bodyFields?: FieldOptions[];
-  /** An array (in order of appearance) of field group options for adding field groups to the body of the form. */
-  fieldGroups?: NgAddFieldGroupOptions[];
-  /** An array (in order of appearance) of tabs to add to the body of the form. */
-  tabs?: NgAddTabOptions[];
-  /** An array (in order of appearance) of sublists to add to a form. */
-  sublists?: { sublist: NgAddSublistOptions; fields: FieldOptions[]; buttons?: NgAddButtonOptions[] }[];
-  /** An array (in order of appearance) of custom page links to add to a form. */
+  tabs?: TabWithFieldsOptions[];
+  fieldGroups?: FieldGroupWithFieldsOptions[];
+  sublists?: SublistWithFieldsOptions[];
+  fields?: FieldOptions[];
+  requiredFieldIds?: FieldId[];
   pageLinks?: NgAddPageLinkOptions[];
-  /** Optionally attach a client script, along with buttons that trigger custom functions there, to this form. */
   clientScript?: {
     path: string;
     buttons?: NgAddButtonOptions[];
   };
 };
 export function createPage(
-  options: CreateAssistantOptions,
-  { bodyFields, fieldGroups, tabs, sublists, pageLinks, clientScript }: PageElements,
+  title: string,
+  { tabs, fieldGroups, sublists, fields, requiredFieldIds, pageLinks, clientScript }: PageElements,
 ): Form {
-  const form = serverWidget.createForm(options);
-  pageLinks?.forEach(linkOptions => form.addPageLink(linkOptions));
-  tabs?.forEach(tabOptions => form.addTab(tabOptions));
-  fieldGroups?.forEach(groupOptions => form.addFieldGroup(groupOptions));
-  bodyFields?.forEach(fieldOptions => form.addField(fieldOptions));
-
+  const form = serverWidget.createForm({ title });
+  pageLinks?.forEach(link => form.addPageLink(link));
   if (!!clientScript) {
     form.clientScriptModulePath = clientScript.path;
     clientScript.buttons?.forEach(buttonOptions => form.addButton(buttonOptions));
   }
 
-  if (!!sublists) {
-    for (const { sublist: sublistOptions, fields, buttons } of sublists) {
-      const sublist = form.addSublist(sublistOptions);
-      fields.forEach(fieldOptions => sublist.addField(fieldOptions));
-      buttons?.forEach(buttonOptions => sublist.addButton(buttonOptions));
-    }
-  }
+  tabs?.forEach(tab => createContainerWithFields(form, tab));
+  fieldGroups?.forEach(group => createContainerWithFields(form, group));
+  sublists?.forEach(sublist => createContainerWithFields(form, sublist));
+  addFieldsToContainer(form, fields, requiredFieldIds);
 
   return form;
+}
+
+export type AssistantPageElements = {
+  steps: AssistantStepWithFieldsOptions[];
+  sublists?: SublistWithFieldsOptions[];
+  fields?: FieldOptions[];
+  requiredFieldIds?: FieldId[];
+  clientScriptPath?: string;
+};
+export function createAssistantPage(
+  title: string,
+  { steps, sublists, fields, requiredFieldIds, clientScriptPath }: AssistantPageElements,
+): Assistant {
+  const assistant = serverWidget.createAssistant({ title });
+  if (!!clientScriptPath) {
+    assistant.clientScriptModulePath = clientScriptPath;
+  }
+
+  steps.forEach(step => createContainerWithFields(assistant, step));
+  sublists?.forEach(sublist => createContainerWithFields(assistant, sublist));
+  addFieldsToContainer(assistant, fields, requiredFieldIds);
+
+  return assistant;
 }
