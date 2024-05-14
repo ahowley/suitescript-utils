@@ -47,7 +47,7 @@ export function getColumns(results: SqlResults): Map<string, Column> {
     return columnMap;
   }
 
-  results[0].columns.forEach(col => {
+  results[0].columns?.forEach(col => {
     const columnId = col.fieldId;
     if (columnMap.has(columnId)) {
       throwError.unexpectedDuplicate("SQL Query Result Column ID", columnId);
