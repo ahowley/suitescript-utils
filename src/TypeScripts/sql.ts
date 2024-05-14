@@ -34,6 +34,13 @@ export function sql(
   return resultsSets;
 }
 
+/**
+ * Get a map of column field IDs to their respective NetSuite column objects.
+ *
+ * @param results
+ *
+ * @throws UNEXPECTED_DUPLICATE - All field IDs are expected to be unique.
+ */
 export function getColumns(results: SqlResults): Map<string, Column> {
   const columnMap = new Map<string, Column>();
   if (!(results.length > 0)) {
@@ -52,11 +59,16 @@ export function getColumns(results: SqlResults): Map<string, Column> {
   return columnMap;
 }
 
+/**
+ * Convert a set of SqlResults into a Table2d for more easily working with the resulting data.
+ *
+ * @param results
+ * @param renameColumns - an optional map of columns you'd like to manually rename something other than their
+ * field IDs.
+ */
 export function resultsAsTable(results: SqlResults, renameColumns?: Map<string, string>): Table2d<SqlResultValue> {
   const columns = getColumns(results);
-  const columnIds = [...columns.entries()].map(([columnId, _col]) =>
-    renameColumns?.has(columnId) ? renameColumns.get(columnId)! : columnId,
-  );
+  const columnIds = [...columns.entries()].map(([columnId, _]) => renameColumns?.get(columnId) ?? columnId);
 
   const values = results.flatMap(set => {
     const results = set.results;

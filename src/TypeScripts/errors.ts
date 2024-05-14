@@ -7,6 +7,12 @@
 import log from "N/log";
 import error from "N/error";
 
+/**
+ * This is a utility for logging an error without suspending execution.
+ *
+ * @param logTitle - This will print in NetSuite's logs as the title of this entry.
+ * @param err - The error object, usually obtained from a catch block.
+ */
 export function logAndSuppressError(logTitle: string, err: error.SuiteScriptError | Error | any): boolean {
   let logDetails = "An error has occurred.";
 

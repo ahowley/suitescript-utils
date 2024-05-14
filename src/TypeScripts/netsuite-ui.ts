@@ -282,6 +282,15 @@ type SublistWithFieldsOptions = ContainerWithFieldOptions & {
   buttons?: NgAddButtonOptions[];
 };
 
+/**
+ * Nests a set of NetSuite fields into an existing NetSuite object.
+ *
+ * @param container - the page or sublist into which we're inserting fields
+ * @param fields - the fields to create and add to the page, as a set of FieldOptions objects
+ * @param requiredFieldIds - fieldIds you'd like NetSuite to mark as mandatory
+ * @param subcontainerId - a tab, field group, or assistant step you'd like to add these fields to,
+ * instead of the record body
+ */
 export function addFieldsToContainer(
   container: Form | Assistant | Sublist,
   fields: FieldOptions[],
@@ -297,15 +306,39 @@ export function addFieldsToContainer(
   });
 }
 
+/**
+ * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ *
+ * @param page - The NetSuite page object to add the container to.
+ * @param props - Further options related to the container type you'd like to create.
+ */
 function createContainerWithFields(container: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
+/**
+ * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ *
+ * @param page - The NetSuite page object to add the container to.
+ * @param props - Further options related to the container type you'd like to create.
+ */
 function createContainerWithFields(
   container: Form,
   { group, fields, requiredFieldIds }: FieldGroupWithFieldsOptions,
 ): void;
+/**
+ * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ *
+ * @param page - The NetSuite page object to add the container to.
+ * @param props - Further options related to the container type you'd like to create.
+ */
 function createContainerWithFields(
   container: Assistant,
   { step, fields, requiredFieldIds }: AssistantStepWithFieldsOptions,
 ): void;
+/**
+ * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ *
+ * @param page - The NetSuite page object to add the container to.
+ * @param props - Further options related to the container type you'd like to create.
+ */
 function createContainerWithFields(
   container: Assistant | Form,
   { sublist, fields, requiredFieldIds, buttons }: SublistWithFieldsOptions,
@@ -363,6 +396,12 @@ export type PageElements = {
     buttons?: NgAddButtonOptions[];
   };
 };
+/**
+ * Create a NetSuite form for use in a Suitelet.
+ *
+ * @param title - The page title for this Suitelet page.
+ * @param props - Elements to create and add to the page.
+ */
 export function createPage(
   title: string,
   { tabs, fieldGroups, sublists, fields, requiredFieldIds, pageLinks, clientScript }: PageElements,
@@ -389,6 +428,12 @@ export type AssistantPageElements = {
   requiredFieldIds?: FieldId[];
   clientScriptPath?: string;
 };
+/**
+ * Create a NetSuite Assistant for use in a Suitelet.
+ *
+ * @param title - The page title for this Suitelet page.
+ * @param props - Elements to create and add to the page.
+ */
 export function createAssistantPage(
   title: string,
   { steps, sublists, fields, requiredFieldIds, clientScriptPath }: AssistantPageElements,

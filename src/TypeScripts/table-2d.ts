@@ -3,7 +3,7 @@
  * @NApiVersion 2.1
  *
  * This module contains functionality for basic grouping and summarization around a table-like data structure,
- * built to intuitively interoperate with NetSuite's native data types.
+ * built to intuitively interoperate with .
  */
 
 export class Table2d<T> {
