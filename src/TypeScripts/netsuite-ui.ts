@@ -264,6 +264,8 @@ export const field = {
   },
 };
 
+export type NgFieldType = keyof typeof field;
+
 type NgAddTabOptions = Omit<AddFieldGroupOptions, "id"> & { id: TabId };
 type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
 type NgAddStepOptions = Omit<AddFieldGroupOptions, "id"> & { id: AssistantStepId };
@@ -280,7 +282,7 @@ type SublistWithFieldsOptions = ContainerWithFieldOptions & {
   buttons?: NgAddButtonOptions[];
 };
 
-function addFieldsToContainer(
+export function addFieldsToContainer(
   container: Form | Assistant | Sublist,
   fields: FieldOptions[],
   requiredFieldIds: FieldId[],

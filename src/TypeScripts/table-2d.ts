@@ -6,7 +6,7 @@
  * built to intuitively interoperate with NetSuite's native data types.
  */
 
-import { FieldValue } from "@hitc/netsuite-types/N/record";
+import { FieldValue } from "N/record";
 
 export class Table2d {
   #iteratorIndex: number;
