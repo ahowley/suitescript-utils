@@ -68,4 +68,15 @@ export const throwError = {
       `Code intended to be unreachable was reached and executed: ${description}`,
     );
   },
+  /**
+   * Raise this type of error when you find an unexpected duplicate value.
+   * @param nameOfDuplicate - the name of the duplicated field, property, etc.
+   * @param valueOfDuplicate - the value that was duplicated.
+   */
+  unexpectedDuplicate: (nameOfDuplicate: string, valueOfDuplicate: string) => {
+    createAndThrowError(
+      "UNEXPECTED_DUPLICATE",
+      `A value that was supposed to be unique instead appeared at least twice. Name: ${nameOfDuplicate} | Duplicate Value: ${valueOfDuplicate}`,
+    );
+  },
 };

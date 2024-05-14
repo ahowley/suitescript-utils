@@ -4,7 +4,7 @@
  * A collection of common operations performed in client scripts.
  */
 
-import { ClientCurrentRecord } from "@hitc/netsuite-types/N/record";
+import { ClientCurrentRecord } from "N/record";
 
 export function required(loadedRecord: ClientCurrentRecord, fieldId: string, isRequired: boolean) {
   const field = loadedRecord.getField({ fieldId });

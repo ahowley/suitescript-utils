@@ -6,15 +6,13 @@
  * built to intuitively interoperate with NetSuite's native data types.
  */
 
-import { FieldValue } from "N/record";
-
-export class Table2d {
+export class Table2d<T> {
   #iteratorIndex: number;
   #columnIndicesCached: Map<string, number>;
   columns: string[];
-  rows: FieldValue[][];
+  rows: T[][];
 
-  constructor(columns: string[], rows: any[][]) {
+  constructor(columns: string[], rows: T[][]) {
     this.columns = columns;
     this.rows = rows;
     this.#iteratorIndex = -1;
@@ -43,11 +41,11 @@ export class Table2d {
     return this.rows[row][col];
   }
 
-  join(table: Table2d) {
+  join(table: Table2d<T>) {
     return new Table2dJoin(this, table);
   }
 
-  union(table: Table2d) {
+  union(table: Table2d<T>) {
     const unionColumns = this.columns.filter(col => table.columns.includes(col));
     if (unionColumns.length === 0) {
       return null;
@@ -74,7 +72,7 @@ export class Table2d {
   }
 
   summarize(groupColumns: string[], sumColumns: string[], countColumns: string[]) {
-    const hashedRows = new Map<string, FieldValue[]>();
+    const hashedRows = new Map<string, (T | number)[]>();
     const groupColumnIndices = groupColumns
       .map(col => this.getColumnIndexByName(col))
       .filter(col => col !== null) as number[];
@@ -121,7 +119,7 @@ export class Table2d {
       ...columnIndicesToCount,
     ];
 
-    const summarizedRows: FieldValue[][] = [];
+    const summarizedRows: (number | T)[][] = [];
     for (const summaryRow of hashedRows.values()) {
       summarizedRows.push(summaryRow.filter((_, i) => allSummaryIndices.includes(i)));
     }
@@ -141,7 +139,7 @@ export class Table2d {
     return this.rows.at(index);
   }
 
-  concat(...values: (FieldValue[] | FieldValue[][])[]) {
+  concat(...values: (T[] | T[][])[]) {
     return new Table2d(this.columns, this.rows.concat(...values));
   }
 
@@ -149,27 +147,27 @@ export class Table2d {
     return this.rows.entries();
   }
 
-  every(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  every(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.every(predicate);
   }
 
-  filter(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  filter(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return new Table2d(this.columns, this.rows.filter(predicate));
   }
 
-  find(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  find(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.find(predicate);
   }
 
-  findIndex(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  findIndex(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.findIndex(predicate);
   }
 
-  findLast(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  findLast(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.findLast(predicate);
   }
 
-  findLastIndex(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  findLastIndex(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.findLastIndex(predicate);
   }
 
@@ -177,23 +175,23 @@ export class Table2d {
     return this.rows.flat();
   }
 
-  flatMap(callback: (value: FieldValue[], index: number, array: FieldValue[][]) => any) {
+  flatMap(callback: (value: T[], index: number, array: T[][]) => any) {
     return new Table2d(this.columns, this.rows.flatMap(callback));
   }
 
-  forEach(callback: (value: FieldValue[], index: number, array: FieldValue[][]) => void) {
+  forEach(callback: (value: T[], index: number, array: T[][]) => void) {
     return this.rows.forEach(callback);
   }
 
-  map(callback: (value: FieldValue[], index: number, array: FieldValue[][]) => any) {
+  map(callback: (value: T[], index: number, array: T[][]) => any) {
     return new Table2d(this.columns, this.rows.map(callback));
   }
 
-  reduce(callback: (accumulator: any, current: FieldValue[], index: number, array: FieldValue[][]) => any) {
+  reduce(callback: (accumulator: any, current: T[], index: number, array: T[][]) => any) {
     return this.rows.reduce(callback);
   }
 
-  reduceRight(callback: (accumulator: any, current: FieldValue[], index: number, array: FieldValue[][]) => any) {
+  reduceRight(callback: (accumulator: any, current: T[], index: number, array: T[][]) => any) {
     return this.rows.reduceRight(callback);
   }
 
@@ -201,16 +199,16 @@ export class Table2d {
     this.rows.reverse();
   }
 
-  some(predicate: (value: FieldValue[], index: number, array: FieldValue[][]) => boolean) {
+  some(predicate: (value: T[], index: number, array: T[][]) => boolean) {
     return this.rows.some(predicate);
   }
 
-  sort(compareFn: (a: FieldValue[], b: FieldValue[]) => number) {
+  sort(compareFn: (a: T[], b: T[]) => number) {
     this.rows.sort(compareFn);
   }
 
   // Iterable/Iterator Implementation
-  next(): IteratorResult<FieldValue[], null> {
+  next(): IteratorResult<T[], null> {
     this.#iteratorIndex += 1;
     if (this.#iteratorIndex < this.rows.length) {
       return {
@@ -230,11 +228,11 @@ export class Table2d {
   }
 }
 
-export class Table2dJoin {
-  table1: Table2d;
-  table2: Table2d;
+export class Table2dJoin<T> {
+  table1: Table2d<T>;
+  table2: Table2d<T>;
 
-  constructor(table1: Table2d, table2: Table2d) {
+  constructor(table1: Table2d<T>, table2: Table2d<T>) {
     this.table1 = table1;
     this.table2 = table2;
   }
