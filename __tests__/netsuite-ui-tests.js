@@ -1,5 +1,5 @@
 import error from "N/error";
-import { fieldId } from "../src/FileCabinet/SuiteScripts/utils/netsuite-ui";
+import { fieldId } from "../src/FileCabinet/SuiteScripts/utils/common";
 
 jest.mock("N/error");
 
