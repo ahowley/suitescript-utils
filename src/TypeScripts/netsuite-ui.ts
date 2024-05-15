@@ -44,6 +44,9 @@ type IntegerFieldOptions = UniversalFieldOptions & {
 type DecimalFieldOptions = UniversalFieldOptions & {
   type: FieldType.FLOAT | FieldType.CURRENCY;
 };
+type CheckboxFieldOptions = UniversalFieldOptions & {
+  type: FieldType.CHECKBOX;
+};
 type DateFieldOptions = UniversalFieldOptions & {
   type: FieldType.DATE | FieldType.DATETIMETZ;
 };
@@ -63,6 +66,7 @@ type FieldOptions =
   | PhoneFieldOptions
   | IntegerFieldOptions
   | DecimalFieldOptions
+  | CheckboxFieldOptions
   | DateFieldOptions
   | SelectFieldOptions
   | CustomSelectFieldOptions;
@@ -136,6 +140,9 @@ export const field = {
       label,
       type: isCurrency ? (FieldType.CURRENCY as FieldType.CURRENCY) : (FieldType.FLOAT as FieldType.FLOAT),
     };
+  },
+  checkbox: (id: FieldId, label: string): CheckboxFieldOptions => {
+    return { id, label, type: FieldType.CHECKBOX as FieldType.CHECKBOX };
   },
   /**
    * @param dateOnly - Whether to exclude the time component from this field, only storing the date.
