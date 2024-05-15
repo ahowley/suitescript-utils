@@ -223,15 +223,15 @@ export function addFieldsToContainer(
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
  */
-function createContainerWithFields(container: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
+export function createContainerWithFields(page: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
 /**
  * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
  *
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
  */
-function createContainerWithFields(
-  container: Form,
+export function createContainerWithFields(
+  page: Form,
   { group, fields, requiredFieldIds }: FieldGroupWithFieldsOptions,
 ): void;
 /**
@@ -240,8 +240,8 @@ function createContainerWithFields(
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
  */
-function createContainerWithFields(
-  container: Assistant,
+export function createContainerWithFields(
+  page: Assistant,
   { step, fields, requiredFieldIds }: AssistantStepWithFieldsOptions,
 ): void;
 /**
@@ -250,11 +250,11 @@ function createContainerWithFields(
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
  */
-function createContainerWithFields(
-  container: Assistant | Form,
+export function createContainerWithFields(
+  page: Assistant | Form,
   { sublist, fields, requiredFieldIds, buttons }: SublistWithFieldsOptions,
 ): void;
-function createContainerWithFields(
+export function createContainerWithFields(
   page: Assistant | Form,
   {
     tab,
