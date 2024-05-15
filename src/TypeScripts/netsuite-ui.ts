@@ -229,25 +229,27 @@ export function addFieldsToContainer(
  * @param sublist: The serverWidget sublist object to add field values to.
  * @param values: A map of serverWidget sublist field ids to the values you'd like to add to the sublist.
  */
-export function addValuesToSublist(sublist: Sublist, values: Map<string, FieldValue>) {
+export function addValuesToSublist(sublist: Sublist, valueRows: Map<FieldId, FieldValue>[]) {
   const lineCount = sublist.lineCount === -1 ? sublist.lineCount : 0;
 
   for (let line = 0; line < lineCount; line++) {
-    for (const [id, value] of values) {
-      if (value === null || value === undefined) {
-        continue;
+    for (const values of valueRows) {
+      for (const [id, value] of values) {
+        if (value === null || value === undefined) {
+          continue;
+        }
+
+        const sanitizedValueMap = new Map<string, string>([
+          ["number", `${value}`],
+          ["boolean", value ? "T" : "F"],
+          ["string", value as string],
+        ]);
+        const sanitizedValue = sanitizedValueMap.has(typeof value)
+          ? sanitizedValueMap.get(typeof value)!
+          : JSON.stringify(value);
+
+        sublist.setSublistValue({ id, line, value: sanitizedValue });
       }
-
-      const sanitizedValueMap = new Map<string, string>([
-        ["number", `${value}`],
-        ["boolean", value ? "T" : "F"],
-        ["string", value as string],
-      ]);
-      const sanitizedValue = sanitizedValueMap.has(typeof value)
-        ? sanitizedValueMap.get(typeof value)!
-        : JSON.stringify(value);
-
-      sublist.setSublistValue({ id, line, value: sanitizedValue });
     }
   }
 }
