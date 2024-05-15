@@ -100,3 +100,36 @@ export type PageLinkId = `custpage_lnk_${string}`;
 export function pageLinkId(slug: string): PageLinkId {
   return `custpage_lnk_${validateNsIdSlug(slug)}`;
 }
+
+/**
+ * A map from NetSuite field types to their constructors in JavaScript. This can be useful when
+ * trying to manage types related to Record.setValue() and Record.getValue() methods.
+ *
+ * Note that select fields return Internal IDs that are numbers as strings (hence the InternalId type
+ * included in our common module), and multiselect fields return an array of strings (if custom select
+ * values are used) or InternalIds (still as strings).
+ */
+export const NS_FIELD_VALUE_JS_CONSTRUCTORS = {
+  checkbox: Boolean,
+  currency: Number,
+  date: Date,
+  datetime: Date,
+  datetimetz: Date,
+  float: Number,
+  email: String,
+  text: String,
+  help: String,
+  url: String,
+  inlinehtml: String,
+  integer: Number,
+  select: String,
+  multiselect: Array,
+  password: String,
+  longtext: String,
+  percent: Number,
+  phone: String,
+  richtext: String,
+  textarea: String,
+  timeofday: Date,
+  identifier: String,
+};
