@@ -227,9 +227,10 @@ export function addFieldsToContainer(
  * Add a Map of field ids to field values to a sublist on a loaded record.
  *
  * @param sublist: The serverWidget sublist object to add field values to.
- * @param values: A map of serverWidget sublist field ids to the values you'd like to add to the sublist.
+ * @param values: An array of rows of tuples that contain serverWidget sublist field ids and the values you'd like to add to
+ * those fields.
  */
-export function addValuesToSublist(sublist: Sublist, valueRows: Map<FieldId, FieldValue>[]) {
+export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldValue][][]) {
   const lineCount = sublist.lineCount === -1 ? sublist.lineCount : 0;
 
   for (let line = 0; line < lineCount; line++) {
