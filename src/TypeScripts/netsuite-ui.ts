@@ -231,26 +231,24 @@ export function addFieldsToContainer(
  * those fields.
  */
 export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldValue][][]) {
-  const lineCount = sublist.lineCount === -1 ? sublist.lineCount : 0;
+  for (const row of valueRows) {
+    const line = sublist.lineCount === -1 ? sublist.lineCount : 0;
 
-  for (let line = 0; line < lineCount; line++) {
-    for (const values of valueRows) {
-      for (const [id, value] of values) {
-        if (value === null || value === undefined) {
-          continue;
-        }
-
-        const sanitizedValueMap = new Map<string, string>([
-          ["number", `${value}`],
-          ["boolean", value ? "T" : "F"],
-          ["string", value as string],
-        ]);
-        const sanitizedValue = sanitizedValueMap.has(typeof value)
-          ? sanitizedValueMap.get(typeof value)!
-          : JSON.stringify(value);
-
-        sublist.setSublistValue({ id, line, value: sanitizedValue });
+    for (const [id, value] of row) {
+      if (value === null || value === undefined) {
+        continue;
       }
+
+      const sanitizedValueMap = new Map<string, string>([
+        ["number", `${value}`],
+        ["boolean", value ? "T" : "F"],
+        ["string", value as string],
+      ]);
+      const sanitizedValue = sanitizedValueMap.has(typeof value)
+        ? sanitizedValueMap.get(typeof value)!
+        : JSON.stringify(value);
+
+      sublist.setSublistValue({ id, line, value: sanitizedValue });
     }
   }
 }
