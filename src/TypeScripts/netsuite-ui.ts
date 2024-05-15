@@ -187,7 +187,6 @@ type NgAddPageLinkOptions = Omit<AddPageLinkOptions, "id"> & { id: PageLinkId };
 type ContainerWithFieldOptions = { fields: FieldOptions[]; requiredFieldIds: FieldId[] };
 type TabWithFieldsOptions = ContainerWithFieldOptions & { tab: NgAddTabOptions };
 type FieldGroupWithFieldsOptions = ContainerWithFieldOptions & { group: NgAddFieldGroupOptions };
-type AssistantStepWithFieldsOptions = ContainerWithFieldOptions & { step: NgAddStepOptions };
 type SublistWithFieldsOptions = ContainerWithFieldOptions & {
   sublist: NgAddSublistOptions;
   buttons?: NgAddButtonOptions[];
@@ -206,7 +205,7 @@ export function addFieldsToContainer(
   container: Form | Assistant | Sublist,
   fields: FieldOptions[],
   requiredFieldIds: FieldId[],
-  subcontainerId?: TabId | FieldGroupId | AssistantStepId,
+  subcontainerId?: TabId | FieldGroupId,
 ) {
   fields.forEach(field => {
     const fieldOptions = !!subcontainerId ? { container: subcontainerId, ...field } : field;
@@ -218,14 +217,14 @@ export function addFieldsToContainer(
 }
 
 /**
- * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ * Create a nested NetSuite tab, field group, or sublist, with the provided fields.
  *
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
  */
 export function createContainerWithFields(page: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
 /**
- * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ * Create a nested NetSuite tab, field group, or sublist, with the provided fields.
  *
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
@@ -235,17 +234,7 @@ export function createContainerWithFields(
   { group, fields, requiredFieldIds }: FieldGroupWithFieldsOptions,
 ): void;
 /**
- * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
- *
- * @param page - The NetSuite page object to add the container to.
- * @param props - Further options related to the container type you'd like to create.
- */
-export function createContainerWithFields(
-  page: Assistant,
-  { step, fields, requiredFieldIds }: AssistantStepWithFieldsOptions,
-): void;
-/**
- * Create a nested NetSuite tab, field group, assistant step, or sublist, with the provided fields.
+ * Create a nested NetSuite tab, field group, or sublist, with the provided fields.
  *
  * @param page - The NetSuite page object to add the container to.
  * @param props - Further options related to the container type you'd like to create.
@@ -259,7 +248,6 @@ export function createContainerWithFields(
   {
     tab,
     group,
-    step,
     sublist,
     fields,
     requiredFieldIds,
@@ -267,22 +255,18 @@ export function createContainerWithFields(
   }: ContainerWithFieldOptions & {
     tab?: NgAddTabOptions;
     group?: NgAddFieldGroupOptions;
-    step?: NgAddStepOptions;
     sublist?: NgAddSublistOptions;
     buttons?: NgAddButtonOptions[];
   },
 ) {
   let container: Assistant | Form | Sublist = page;
-  let subcontainer: TabId | FieldGroupId | AssistantStepId | undefined;
+  let subcontainer: TabId | FieldGroupId | undefined;
   if (!!tab) {
     (page as Form).addTab(tab);
     subcontainer = tab.id;
   } else if (!!group) {
     (page as Form).addFieldGroup(group);
     subcontainer = group.id;
-  } else if (!!step) {
-    (page as Assistant).addStep(step);
-    subcontainer = step.id;
   } else if (!!sublist) {
     container = page.addSublist(sublist);
     buttons?.forEach(button => (container as Sublist).addButton(button));
@@ -333,7 +317,7 @@ export function createPage(
 }
 
 export type AssistantPageElements = {
-  steps: AssistantStepWithFieldsOptions[];
+  steps: NgAddStepOptions[];
   sublists?: SublistWithFieldsOptions[];
   fields?: FieldOptions[];
   requiredFieldIds?: FieldId[];
@@ -354,7 +338,7 @@ export function createAssistantPage(
     assistant.clientScriptModulePath = clientScriptPath;
   }
 
-  steps.forEach(step => createContainerWithFields(assistant, step));
+  steps.forEach(step => assistant.addStep(step));
   sublists?.forEach(sublist => createContainerWithFields(assistant, sublist));
   addFieldsToContainer(assistant, fields ?? [], requiredFieldIds ?? []);
 
