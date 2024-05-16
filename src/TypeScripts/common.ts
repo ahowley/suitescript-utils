@@ -12,12 +12,12 @@ import { throwError } from "./errors";
 export type InternalId = `${number}`;
 
 function validateNsIdSlug(slug: string): string {
-  const invalidCharacters = slug.match(/[^a-z_]/);
+  const invalidCharacters = slug.match(/[^a-z0-9_]/);
   if (invalidCharacters !== null) {
     throwError.wrongType(
       "slug",
       slug,
-      "A custom form element ID can only consist of lowercase letters and underscores.",
+      "A custom form element ID can only consist of lowercase letters, numbers, and underscores.",
     );
   }
 
