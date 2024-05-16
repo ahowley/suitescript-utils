@@ -19,46 +19,46 @@ import serverWidget, {
 import { AssistantStepId, ButtonId, FieldGroupId, FieldId, PageLinkId, SublistId, TabId } from "./common";
 import { throwError } from "./errors";
 
-type UniversalFieldOptions = {
+export type UniversalFieldOptions = {
   id: FieldId;
   label: string;
 };
-type TextFieldOptions = UniversalFieldOptions & {
+export type TextFieldOptions = UniversalFieldOptions & {
   type: FieldType.TEXT | FieldType.TEXTAREA | FieldType.LONGTEXT;
 };
-type HtmlFieldOptions = UniversalFieldOptions & {
+export type HtmlFieldOptions = UniversalFieldOptions & {
   type: FieldType.INLINEHTML;
 };
-type EmailFieldOptions = UniversalFieldOptions & {
+export type EmailFieldOptions = UniversalFieldOptions & {
   type: FieldType.EMAIL;
 };
-type PasswordFieldOptions = UniversalFieldOptions & {
+export type PasswordFieldOptions = UniversalFieldOptions & {
   type: FieldType.PASSWORD;
 };
-type PhoneFieldOptions = UniversalFieldOptions & {
+export type PhoneFieldOptions = UniversalFieldOptions & {
   type: FieldType.PHONE;
 };
-type IntegerFieldOptions = UniversalFieldOptions & {
+export type IntegerFieldOptions = UniversalFieldOptions & {
   type: FieldType.INTEGER | FieldType.PERCENT;
 };
-type DecimalFieldOptions = UniversalFieldOptions & {
+export type DecimalFieldOptions = UniversalFieldOptions & {
   type: FieldType.FLOAT | FieldType.CURRENCY;
 };
-type CheckboxFieldOptions = UniversalFieldOptions & {
+export type CheckboxFieldOptions = UniversalFieldOptions & {
   type: FieldType.CHECKBOX;
 };
-type DateFieldOptions = UniversalFieldOptions & {
+export type DateFieldOptions = UniversalFieldOptions & {
   type: FieldType.DATE | FieldType.DATETIMETZ;
 };
-type SelectFieldOptions = UniversalFieldOptions & {
+export type SelectFieldOptions = UniversalFieldOptions & {
   type: FieldType.SELECT | FieldType.MULTISELECT;
   source: string;
 };
-type CustomSelectFieldOptions = UniversalFieldOptions & {
+export type CustomSelectFieldOptions = UniversalFieldOptions & {
   type: FieldType.SELECT | FieldType.MULTISELECT;
 };
 
-type FieldOptions =
+export type FieldOptions =
   | TextFieldOptions
   | HtmlFieldOptions
   | EmailFieldOptions
@@ -184,17 +184,17 @@ export const field = {
 
 export type NgFieldType = keyof typeof field;
 
-type NgAddTabOptions = Omit<AddFieldGroupOptions, "id"> & { id: TabId };
-type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
-type NgAddStepOptions = Omit<AddFieldGroupOptions, "id"> & { id: AssistantStepId };
-type NgAddSublistOptions = Omit<AddSublistOptions, "id"> & { id: SublistId };
-type NgAddButtonOptions = Omit<AddButtonOptions, "id"> & { id: ButtonId };
-type NgAddPageLinkOptions = Omit<AddPageLinkOptions, "id"> & { id: PageLinkId };
+export type NgAddTabOptions = Omit<AddFieldGroupOptions, "id"> & { id: TabId };
+export type NgAddFieldGroupOptions = Omit<AddFieldGroupOptions, "id"> & { id: FieldGroupId };
+export type NgAddStepOptions = Omit<AddFieldGroupOptions, "id"> & { id: AssistantStepId };
+export type NgAddSublistOptions = Omit<AddSublistOptions, "id"> & { id: SublistId };
+export type NgAddButtonOptions = Omit<AddButtonOptions, "id"> & { id: ButtonId };
+export type NgAddPageLinkOptions = Omit<AddPageLinkOptions, "id"> & { id: PageLinkId };
 
-type ContainerWithFieldOptions = { fields: FieldOptions[]; requiredFieldIds: FieldId[] };
-type TabWithFieldsOptions = ContainerWithFieldOptions & { tab: NgAddTabOptions };
-type FieldGroupWithFieldsOptions = ContainerWithFieldOptions & { group: NgAddFieldGroupOptions };
-type SublistWithFieldsOptions = ContainerWithFieldOptions & {
+export type ContainerWithFieldOptions = { fields: FieldOptions[]; requiredFieldIds: FieldId[] };
+export type TabWithFieldsOptions = ContainerWithFieldOptions & { tab: NgAddTabOptions };
+export type FieldGroupWithFieldsOptions = ContainerWithFieldOptions & { group: NgAddFieldGroupOptions };
+export type SublistWithFieldsOptions = ContainerWithFieldOptions & {
   sublist: NgAddSublistOptions;
   buttons?: NgAddButtonOptions[];
 };
@@ -235,7 +235,7 @@ export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldV
     const line = sublist.lineCount === -1 ? 0 : sublist.lineCount;
 
     for (const [id, value] of row) {
-      if (value === null || value === undefined) {
+      if (value === null || value === undefined || value === "") {
         continue;
       }
 
