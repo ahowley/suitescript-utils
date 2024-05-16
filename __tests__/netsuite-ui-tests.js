@@ -8,16 +8,15 @@ beforeEach(() => {
 });
 
 describe("validating field and form custom ids are in the right format", () => {
-  it("should allow lowercase letters and underscores", () => {
-    const id = fieldId("test_id");
-    const expectedId = "custpage_fld_test_id";
+  it("should allow lowercase letters, numbers, and underscores", () => {
+    const id = fieldId("test_id_1");
+    const expectedId = "custpage_fld_test_id_1";
     expect(id).toBe(expectedId);
   });
 
-  it("should disallow capitals, numbers, and spaces", () => {
+  it("should disallow capitals and spaces", () => {
     error.create.mockReturnValue("error");
     expect(() => fieldId("Test")).toThrow("error");
-    expect(() => fieldId("test_1")).toThrow("error");
     expect(() => fieldId("test one")).toThrow("error");
   });
 });
