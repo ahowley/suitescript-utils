@@ -232,7 +232,7 @@ export function addFieldsToContainer(
  */
 export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldValue][][]) {
   for (const row of valueRows) {
-    const line = sublist.lineCount === -1 ? sublist.lineCount : 0;
+    const line = sublist.lineCount === -1 ? 0 : sublist.lineCount;
 
     for (const [id, value] of row) {
       if (value === null || value === undefined) {
