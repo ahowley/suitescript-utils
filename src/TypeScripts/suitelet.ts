@@ -7,8 +7,8 @@
 
 import { Table2d } from "./table-2d";
 
-const COL_DELIMITER = "\u0001";
-const ROW_DELIMITER = "\u0002";
+export const COL_DELIMITER = "\u0001";
+export const ROW_DELIMITER = "\u0002";
 
 /**
  * Provide a single parameter you'd like parsed as a table - usually, a custom field id. This will convert the string representation
