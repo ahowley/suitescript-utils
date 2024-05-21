@@ -5,6 +5,7 @@
  */
 
 import { throwError } from "./errors";
+import { Type as RecordType } from "N/record";
 
 /**
  * A NetSuite record Internal ID, as it is returned from the Record.getValue() method.
@@ -133,3 +134,59 @@ export const NS_FIELD_VALUE_JS_CONSTRUCTORS = {
   timeofday: Date,
   identifier: String,
 };
+
+type TransactionType =
+  | RecordType.EXPENSE_REPORT
+  | RecordType.CREDIT_CARD_CHARGE
+  | RecordType.PURCHASE_ORDER
+  | RecordType.ITEM_RECEIPT
+  | RecordType.SALES_ORDER
+  | RecordType.CHECK
+  | RecordType.CREDIT_MEMO
+  | RecordType.CUSTOMER_REFUND
+  | RecordType.VENDOR_PREPAYMENT
+  | RecordType.VENDOR_CREDIT
+  | RecordType.ITEM_FULFILLMENT
+  | RecordType.VENDOR_PAYMENT
+  | RecordType.CUSTOMER_PAYMENT
+  | RecordType.CASH_REFUND
+  | RecordType.INVOICE
+  | RecordType.DEPOSIT
+  | RecordType.INVENTORY_ADJUSTMENT
+  | RecordType.VENDOR_BILL
+  | RecordType.JOURNAL_ENTRY;
+/**
+ * This utility provides a Map from the string values of the Record.Type SuiteScript enum to their display text values as
+ * they appear in NetSuite saved searches, SuiteQL queries, etc. This is a function and not an exported constant because
+ * SuiteScript can only use imported module members in a deployment, which means module-level code can't access SuiteScript APIs.
+ *
+ * @param reverse: Optionally set this parameter to true to get a map from display values to transaction types, rather than
+ * the other way around.
+ */
+export function getTransactionTypeDisplayValueMap(reverse?: true) {
+  // These values *are* strings, but the hitc SuiteScript types package calls them an enum, so we have to cast them
+  const valueArray: [string, string][] = [
+    [RecordType.EXPENSE_REPORT as any as string, "ExpRept"],
+    [RecordType.CREDIT_CARD_CHARGE as any as string, "CardChrg"],
+    [RecordType.PURCHASE_ORDER as any as string, "PurchOrd"],
+    [RecordType.ITEM_RECEIPT as any as string, "ItemRcpt"],
+    [RecordType.SALES_ORDER as any as string, "SalesOrd"],
+    [RecordType.CHECK as any as string, "Check"],
+    [RecordType.CREDIT_MEMO as any as string, "CustCred"],
+    [RecordType.CUSTOMER_REFUND as any as string, "CustRfnd"],
+    [RecordType.VENDOR_PREPAYMENT as any as string, "VPrep"],
+    [RecordType.VENDOR_CREDIT as any as string, "VendCred"],
+    [RecordType.ITEM_FULFILLMENT as any as string, "ItemShip"],
+    [RecordType.VENDOR_PAYMENT as any as string, "VendPymt"],
+    [RecordType.CUSTOMER_PAYMENT as any as string, "CustPymt"],
+    [RecordType.CASH_REFUND as any as string, "CashRfnd"],
+    [RecordType.INVOICE as any as string, "CustInvc"],
+    [RecordType.DEPOSIT as any as string, "Deposit"],
+    [RecordType.INVENTORY_ADJUSTMENT as any as string, "InvAdjst"],
+    [RecordType.VENDOR_BILL as any as string, "VendBill"],
+    [RecordType.JOURNAL_ENTRY as any as string, "Journal"],
+  ];
+  if (reverse) valueArray.forEach(tuple => tuple.reverse());
+
+  return new Map<string, string>(valueArray);
+}
