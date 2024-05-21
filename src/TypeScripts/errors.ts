@@ -47,6 +47,18 @@ function createAndThrowError(name: string, message: string) {
 
 export const throwError = {
   /**
+   * Raise this type of error when a required or expected parameter, property, etc. is missing.
+   *
+   * @param missingValueName - The name of the parameter, property, etc. that is missing.
+   * @param message - Helpful guidance for a developer attempting to correct this error.
+   */
+  missingValue: (missingValueName: string, message: string) => {
+    createAndThrowError(
+      "NG_MISSING_VALUE",
+      `A value was expected to be provided to '${missingValueName}' but is missing: ${message}`,
+    );
+  },
+  /**
    * Raise this type of error when a function, object property, or other behavior expects a value of a
    * different type or shape than what was provided to it, i.e. when validating unknown or untyped values.
    *
