@@ -59,6 +59,15 @@ export const throwError = {
     );
   },
   /**
+   * Raise this type of error when a requested resource is not found in a search, sql query, etc.
+   *
+   * @param missingResourceName - The name of the resource that is missing.
+   * @param message - Helpful guidance for a developer attempting to correct this error.
+   */
+  notFound: (missingResourceName: string, message: string) => {
+    createAndThrowError("NG_NOT_FOUND", `The requested resource '${missingResourceName}' was not found: ${message}`);
+  },
+  /**
    * Raise this type of error when a function, object property, or other behavior expects a value of a
    * different type or shape than what was provided to it, i.e. when validating unknown or untyped values.
    *
