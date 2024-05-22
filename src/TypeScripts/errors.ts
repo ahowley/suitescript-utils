@@ -47,6 +47,13 @@ function createAndThrowError(name: string, message: string): never {
 
 export const throwError = {
   /**
+   * Raise this type of error when a feature or functionality is planned, but not yet implemented.
+   * @param featureName - The name of the feature that hasn't yet been implemented.
+   */
+  notYetImplemented(featureName: string) {
+    return createAndThrowError("NG_NOT_IMPLEMENTED", `The feature ${featureName} has not yet been implemented.`);
+  },
+  /**
    * Raise this type of error when a required or expected parameter, property, etc. is missing.
    *
    * @param missingValueName - The name of the parameter, property, etc. that is missing.
