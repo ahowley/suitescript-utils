@@ -40,7 +40,7 @@ export function logAndSuppressError(logTitle: string, err: error.SuiteScriptErro
   return false;
 }
 
-function createAndThrowError(name: string, message: string) {
+function createAndThrowError(name: string, message: string): never {
   const err = error.create({ name, message });
   throw err;
 }
@@ -53,7 +53,7 @@ export const throwError = {
    * @param message - Helpful guidance for a developer attempting to correct this error.
    */
   missingValue: (missingValueName: string, message: string) => {
-    createAndThrowError(
+    return createAndThrowError(
       "NG_MISSING_VALUE",
       `A value was expected to be provided to '${missingValueName}' but is missing: ${message}`,
     );
@@ -65,7 +65,10 @@ export const throwError = {
    * @param message - Helpful guidance for a developer attempting to correct this error.
    */
   notFound: (missingResourceName: string, message: string) => {
-    createAndThrowError("NG_NOT_FOUND", `The requested resource '${missingResourceName}' was not found: ${message}`);
+    return createAndThrowError(
+      "NG_NOT_FOUND",
+      `The requested resource '${missingResourceName}' was not found: ${message}`,
+    );
   },
   /**
    * Raise this type of error when a function, object property, or other behavior expects a value of a
@@ -78,7 +81,7 @@ export const throwError = {
    */
   wrongType: (invalidValueName: string, invalidValue: any, message: string) => {
     const invalidValueString = typeof invalidValue === "string" ? invalidValue : JSON.stringify(invalidValue);
-    createAndThrowError(
+    return createAndThrowError(
       "NG_TYPE_ERROR",
       `The value ${invalidValueString} provided to ${invalidValueName} is invalid: ${message}`,
     );
@@ -90,7 +93,7 @@ export const throwError = {
    * developer encountering this error.
    */
   shouldBeUnreachable: (description: string) => {
-    createAndThrowError(
+    return createAndThrowError(
       "UNREACHABLE_REACHED",
       `Code intended to be unreachable was reached and executed: ${description}`,
     );
@@ -101,7 +104,7 @@ export const throwError = {
    * @param valueOfDuplicate - the value that was duplicated.
    */
   unexpectedDuplicate: (nameOfDuplicate: string, valueOfDuplicate: string) => {
-    createAndThrowError(
+    return createAndThrowError(
       "UNEXPECTED_DUPLICATE",
       `A value that was supposed to be unique instead appeared at least twice. Name: ${nameOfDuplicate} | Duplicate Value: ${valueOfDuplicate}`,
     );
