@@ -4,8 +4,8 @@
  * Utility code for handling errors inside SuiteScripts.
  */
 
-import log from "N/log";
 import error from "N/error";
+import log from "N/log";
 
 /**
  * This is a utility for logging an error without suspending execution.
@@ -101,7 +101,7 @@ export const throwError = {
    */
   shouldBeUnreachable: (description: string) => {
     return createAndThrowError(
-      "UNREACHABLE_REACHED",
+      "NG_UNREACHABLE_REACHED",
       `Code intended to be unreachable was reached and executed: ${description}`,
     );
   },
@@ -112,7 +112,7 @@ export const throwError = {
    */
   unexpectedDuplicate: (nameOfDuplicate: string, valueOfDuplicate: string) => {
     return createAndThrowError(
-      "UNEXPECTED_DUPLICATE",
+      "NG_UNEXPECTED_DUPLICATE",
       `A value that was supposed to be unique instead appeared at least twice. Name: ${nameOfDuplicate} | Duplicate Value: ${valueOfDuplicate}`,
     );
   },

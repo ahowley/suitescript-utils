@@ -4,8 +4,8 @@
  * A collection of common types, basic utility functions, etc. used across SDF account customization projects.
  */
 
-import { throwError } from "./errors";
 import { Type as RecordType } from "N/record";
+import { throwError } from "./errors";
 
 /**
  * A NetSuite record Internal ID, as it is returned from the Record.getValue() method.
@@ -135,26 +135,6 @@ export const NS_FIELD_VALUE_JS_CONSTRUCTORS = {
   identifier: String,
 };
 
-type TransactionType =
-  | RecordType.EXPENSE_REPORT
-  | RecordType.CREDIT_CARD_CHARGE
-  | RecordType.PURCHASE_ORDER
-  | RecordType.ITEM_RECEIPT
-  | RecordType.SALES_ORDER
-  | RecordType.CHECK
-  | RecordType.CREDIT_MEMO
-  | RecordType.CUSTOMER_REFUND
-  | RecordType.VENDOR_PREPAYMENT
-  | RecordType.VENDOR_CREDIT
-  | RecordType.ITEM_FULFILLMENT
-  | RecordType.VENDOR_PAYMENT
-  | RecordType.CUSTOMER_PAYMENT
-  | RecordType.CASH_REFUND
-  | RecordType.INVOICE
-  | RecordType.DEPOSIT
-  | RecordType.INVENTORY_ADJUSTMENT
-  | RecordType.VENDOR_BILL
-  | RecordType.JOURNAL_ENTRY;
 /**
  * This utility provides a Map from the string values of the Record.Type SuiteScript enum to their display text values as
  * they appear in NetSuite saved searches, SuiteQL queries, etc. This is a function and not an exported constant because

@@ -4,9 +4,9 @@
  * A collection of common functionality relating to SuiteQL queries and/or running NetSuite searches.
  */
 
-import { runSuiteQL, ResultSet, runSuiteQLPaged, Column } from "N/query";
-import { Table2d } from "./table-2d";
+import { Column, ResultSet, runSuiteQL, runSuiteQLPaged } from "N/query";
 import { throwError } from "./errors";
+import { Table2d } from "./table-2d";
 
 type SqlResults = ResultSet[];
 type SqlResultValue = string | number | boolean | null;

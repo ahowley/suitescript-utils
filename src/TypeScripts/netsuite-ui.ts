@@ -5,7 +5,7 @@
  * This module contains functionality for building NetSuite user interfaces using N/ui.
  */
 
-import { Type as RecordType, FieldValue, Record } from "N/record";
+import { FieldValue, Type as RecordType } from "N/record";
 import serverWidget, {
   AddButtonOptions,
   AddFieldGroupOptions,
@@ -260,22 +260,10 @@ export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldV
  * @param props - Further options related to the container type you'd like to create.
  */
 export function createContainerWithFields(page: Form, { tab, fields, requiredFieldIds }: TabWithFieldsOptions): void;
-/**
- * Create a nested NetSuite tab, field group, or sublist, with the provided fields.
- *
- * @param page - The NetSuite page object to add the container to.
- * @param props - Further options related to the container type you'd like to create.
- */
 export function createContainerWithFields(
   page: Form,
   { group, fields, requiredFieldIds }: FieldGroupWithFieldsOptions,
 ): void;
-/**
- * Create a nested NetSuite tab, field group, or sublist, with the provided fields.
- *
- * @param page - The NetSuite page object to add the container to.
- * @param props - Further options related to the container type you'd like to create.
- */
 export function createContainerWithFields(
   page: Assistant | Form,
   { sublist, fields, requiredFieldIds, buttons }: SublistWithFieldsOptions,
