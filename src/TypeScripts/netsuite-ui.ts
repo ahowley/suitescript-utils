@@ -230,7 +230,7 @@ export function addFieldsToContainer(
  * @param values: An array of rows of tuples that contain serverWidget sublist field ids and the values you'd like to add to
  * those fields.
  */
-export function addValuesToSublist(sublist: Sublist, valueRows: [FieldId, FieldValue][][]) {
+export function addValuesToSublist(sublist: Sublist, valueRows: Map<FieldId, FieldValue>[]) {
   for (const row of valueRows) {
     const line = sublist.lineCount === -1 ? 0 : sublist.lineCount;
 
