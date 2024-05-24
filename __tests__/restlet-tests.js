@@ -51,6 +51,22 @@ const TEST_PARAM_SCHEMA = {
       },
       required: true,
     },
+    {
+      param: "tupleparam",
+      type: "tuple",
+      tupleType: [
+        {
+          type: "number",
+        },
+        {
+          type: "array",
+          arrayType: {
+            type: "string",
+          },
+        },
+      ],
+      required: false,
+    },
   ],
 };
 
@@ -72,6 +88,7 @@ describe("request param validation", () => {
         nestedarrayparam: ["bar", "baz"],
       },
       arrayparam: [2, 3, 4],
+      tupleparam: [5, ["foo", "bar", "baz"]],
     };
 
     // when
@@ -124,6 +141,34 @@ describe("request param validation", () => {
       status: 400,
       name: "Request Error - Incorrect Parameter Type",
       message: "The parameter 'numberparam' has the type 'string', but was expected to have the type 'number' instead.",
+    });
+  });
+
+  it("should return wrongParamType if nested tuple type is incorrect", () => {
+    // given
+    const schema = { ...TEST_PARAM_SCHEMA };
+    const invalidParams = {
+      stringparam: "foo",
+      numberparam: 1,
+      booleanparam: true,
+      nullparam: null,
+      primitiveparam: true,
+      objectparam: {
+        nestedarrayparam: ["bar", "baz"],
+      },
+      arrayparam: [2, 3, 4],
+      tupleparam: ["5", ["foo", "bar", "baz"]],
+    };
+
+    // when
+    const validationError = validateRequestParam(invalidParams, schema);
+
+    //then
+    expect(validationError).toEqual({
+      status: 400,
+      name: "Request Error - Incorrect Parameter Type",
+      message:
+        "The parameter '[root or array member]' has the type 'string', but was expected to have the type 'number' instead.",
     });
   });
 
