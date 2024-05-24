@@ -25,14 +25,16 @@ export type JSONType = JSONPrimitive | JSONType[] | { [key: string]: JSONType };
 export type JSONTypeName = "string" | "number" | "boolean" | "null" | "object" | "array";
 
 export type RestletParamSchema<
-  JSONType extends JSONTypeName,
+  JSONType extends JSONTypeName | "primitive",
   IsRoot extends boolean,
   IsArrayElement extends boolean,
 > = {
   param: IsRoot extends true ? undefined : IsArrayElement extends true ? undefined : string;
   type: JSONType;
   arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName, boolean, true> : undefined;
-  properties: JSONType extends "object" ? RestletParamSchema<JSONTypeName, boolean, boolean>[] : undefined;
+  properties: JSONType extends "object"
+    ? RestletParamSchema<JSONTypeName | "primitive", boolean, boolean>[]
+    : undefined;
   required: IsArrayElement extends true ? undefined : boolean;
 };
 
@@ -80,10 +82,13 @@ export function jsonType(val: JSONType): JSONTypeName {
  */
 export function validateRequestParam(
   paramValue: JSONType,
-  { param, type, arrayType, properties }: RestletParamSchema<JSONTypeName, boolean, boolean>,
+  { param, type, arrayType, properties }: RestletParamSchema<JSONTypeName | "primitive", boolean, boolean>,
 ): RestletErrorResponse | null {
   const paramType = jsonType(paramValue);
-  if (paramType !== type) {
+  const isInvalidType = type !== "primitive" && paramType !== type;
+  const isInvaldPrimitive =
+    (type as "primitive") === "primitive" && !["string", "number", "boolean", "null"].includes(paramType);
+  if (isInvalidType || isInvaldPrimitive) {
     return restletError.wrongParamType(param ?? "[root or array member]", paramType, type);
   }
 
@@ -100,7 +105,7 @@ export function validateRequestParam(
     const nestedParams = Object.entries(paramValue as { [param: string]: JSONType });
 
     for (const nestedSchema of properties!) {
-      if (!(nestedSchema.param! in (paramValue as Object))) {
+      if (!(nestedSchema.param! in (paramValue as Object)) && nestedSchema.required) {
         return restletError.missingRequiredParam(nestedSchema.param!);
       }
     }

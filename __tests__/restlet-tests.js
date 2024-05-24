@@ -24,6 +24,11 @@ const TEST_PARAM_SCHEMA = {
       required: true,
     },
     {
+      param: "primitiveparam",
+      type: "primitive",
+      required: false,
+    },
+    {
       param: "objectparam",
       type: "object",
       properties: [
@@ -62,6 +67,7 @@ describe("request param validation", () => {
       numberparam: 1,
       booleanparam: true,
       nullparam: null,
+      primitiveparam: true,
       objectparam: {
         nestedarrayparam: ["bar", "baz"],
       },
@@ -75,7 +81,28 @@ describe("request param validation", () => {
     expect(validationError).toBe(null);
   });
 
-  it("should return wrongParamName if primitive type is incorrect", () => {
+  it("should allow for optional parameters to be omitted", () => {
+    // given
+    const schema = { ...TEST_PARAM_SCHEMA };
+    const validParams = {
+      stringparam: "foo",
+      numberparam: 1,
+      booleanparam: true,
+      nullparam: null,
+      objectparam: {
+        nestedarrayparam: ["bar", "baz"],
+      },
+      arrayparam: [2, 3, 4],
+    };
+
+    // when
+    const validationError = validateRequestParam(validParams, schema);
+
+    //then
+    expect(validationError).toBe(null);
+  });
+
+  it("should return wrongParamType if primitive type is incorrect", () => {
     // given
     const schema = { ...TEST_PARAM_SCHEMA };
     const invalidParams = {
@@ -100,7 +127,34 @@ describe("request param validation", () => {
     });
   });
 
-  it("should return wrongParamName if nested primitive is incorrect", () => {
+  it("should return wrongParamType if param is set to a primitive but the value isn't a primitive", () => {
+    // given
+    const schema = { ...TEST_PARAM_SCHEMA };
+    const invalidParams = {
+      stringparam: "foo",
+      numberparam: 1,
+      booleanparam: true,
+      nullparam: null,
+      primitiveparam: [true],
+      objectparam: {
+        nestedarrayparam: ["bar", "baz"],
+      },
+      arrayparam: [2, 3, 4],
+    };
+
+    // when
+    const validationError = validateRequestParam(invalidParams, schema);
+
+    //then
+    expect(validationError).toEqual({
+      status: 400,
+      name: "Request Error - Incorrect Parameter Type",
+      message:
+        "The parameter 'primitiveparam' has the type 'array', but was expected to have the type 'primitive' instead.",
+    });
+  });
+
+  it("should return wrongParamType if nested primitive is incorrect type", () => {
     // given
     const schema = { ...TEST_PARAM_SCHEMA };
     const invalidParams = {
@@ -149,6 +203,7 @@ describe("request param validation", () => {
       message: "The parameter 'booleanparam' was missing from the request, but is required for this endpoint.",
     });
   });
+
   it("should return wrongParamName if parameter name is not found in schema", () => {
     // given
     const schema = { ...TEST_PARAM_SCHEMA };
