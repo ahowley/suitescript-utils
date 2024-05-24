@@ -29,13 +29,11 @@ export type RestletParamSchema<
   IsRoot extends boolean,
   IsArrayElement extends boolean,
 > = {
-  param: IsRoot extends true ? undefined : IsArrayElement extends true ? undefined : string;
+  param: IsRoot extends true ? void : IsArrayElement extends true ? void : string;
   type: JSONType;
-  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName | "primitive", boolean, true> : undefined;
-  properties: JSONType extends "object"
-    ? RestletParamSchema<JSONTypeName | "primitive", boolean, boolean>[]
-    : undefined;
-  required: IsArrayElement extends true ? undefined : boolean;
+  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName | "primitive", boolean, true> : void;
+  properties: JSONType extends "object" ? RestletParamSchema<JSONTypeName | "primitive", boolean, boolean>[] : void;
+  required: IsArrayElement extends true ? void : boolean;
 };
 
 export const restletError = {
