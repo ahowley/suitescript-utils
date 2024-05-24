@@ -24,11 +24,16 @@ export type JSONType = JSONPrimitive | JSONType[] | { [key: string]: JSONType };
 
 export type JSONTypeName = "string" | "number" | "boolean" | "null" | "object" | "array";
 
-export type RestletParamSchema<T extends JSONTypeName> = {
-  param: T extends "array" ? undefined | string : string;
-  type: T;
-  arrayType: T extends "array" ? RestletParamSchema<JSONTypeName> : undefined;
-  properties: T extends "object" ? RestletParamSchema<JSONTypeName>[] : undefined;
+export type RestletParamSchema<
+  JSONType extends JSONTypeName,
+  IsRoot extends boolean,
+  IsArrayElement extends boolean,
+> = {
+  param: IsRoot extends true ? undefined : IsArrayElement extends true ? undefined : string;
+  type: JSONType;
+  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName, boolean, true> : undefined;
+  properties: JSONType extends "object" ? RestletParamSchema<JSONTypeName, boolean, boolean>[] : undefined;
+  required: IsArrayElement extends true ? undefined : boolean;
 };
 
 export const restletError = {
@@ -68,24 +73,23 @@ export function jsonType(val: JSONType): JSONTypeName {
 }
 
 /**
- * Validate the type of a single request parameter by comparing it to its schema,
- * accounting for nested JSON objects and arrays.
+ * Validate request parameter(s) by comparing it to its schema, accounting for nested JSON objects and arrays.
  *
- * @param paramValue - The value of the parameter being validated.
- * @param schema - An object representing this values expected type.
+ * @param paramValue - The value of the parameter being validated. Can be any valid JSON data type.
+ * @param schema - An object representing this value's expected type.
  */
-export function validateRequestParamType(
+export function validateRequestParam(
   paramValue: JSONType,
-  { param, type, arrayType, properties }: RestletParamSchema<JSONTypeName>,
+  { param, type, arrayType, properties }: RestletParamSchema<JSONTypeName, boolean, boolean>,
 ): RestletErrorResponse | null {
   const paramType = jsonType(paramValue);
   if (paramType !== type) {
-    return restletError.wrongParamType(param ?? "[unnamed array]", paramType, type);
+    return restletError.wrongParamType(param ?? "[root or array member]", paramType, type);
   }
 
   if (paramType === "array") {
     for (const nestedParamValue of paramValue as JSONType[]) {
-      const validationError = validateRequestParamType(nestedParamValue, arrayType!);
+      const validationError = validateRequestParam(nestedParamValue, arrayType!);
       if (validationError) {
         return validationError;
       }
@@ -95,44 +99,22 @@ export function validateRequestParamType(
   } else if (paramType === "object") {
     const nestedParams = Object.entries(paramValue as { [param: string]: JSONType });
 
+    for (const nestedSchema of properties!) {
+      if (!(nestedSchema.param! in (paramValue as Object))) {
+        return restletError.missingRequiredParam(nestedSchema.param!);
+      }
+    }
+
     for (const [nestedParam, nestedParamValue] of nestedParams) {
       const nestedParamSchema = properties!.find(prop => prop.param === nestedParam);
       if (!nestedParamSchema) {
         return restletError.wrongParamName(nestedParam);
       }
 
-      const validationError = validateRequestParamType(nestedParamValue, nestedParamSchema);
+      const validationError = validateRequestParam(nestedParamValue, nestedParamSchema);
       if (validationError) {
         return validationError;
       }
-    }
-  }
-
-  return null;
-}
-
-/**
- * Validate incoming request parameters - that they exist, that they are the correct types,
- * and that all expected parameters are present, accounting for nested JSON objects and arrays.
- *
- * @param params - An object containing the request parameters, usually from a RESTlet entry
- * point.
- * @param schema - An array of objects representing the types of each key-value pair. Allows for
- * recursion and nested schema.
- */
-export function validateRequestParams(
-  params: { [param: string]: JSONType },
-  schema: RestletParamSchema<JSONTypeName>[],
-): RestletErrorResponse | null {
-  for (const [paramName, paramValue] of Object.entries(params)) {
-    const paramSchema = schema.find(prop => prop.param === paramName);
-    if (!paramSchema) {
-      return restletError.wrongParamName(paramName);
-    }
-
-    const validationError = validateRequestParamType(paramValue, paramSchema!);
-    if (validationError) {
-      return validationError;
     }
   }
 
