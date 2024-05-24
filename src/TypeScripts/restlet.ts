@@ -28,16 +28,29 @@ export type RestletParamSchema<
   JSONType extends JSONTypeName | "primitive" | "tuple",
   IsRoot extends boolean,
   IsArrayElement extends boolean,
-> = {
-  param: IsRoot extends true ? void : IsArrayElement extends true ? void : string;
-  required: IsRoot extends true ? void : IsArrayElement extends true ? void : boolean;
-  type: JSONType;
-  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true> : void;
-  tupleType: JSONType extends "tuple" ? RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true>[] : void;
-  properties: JSONType extends "object"
-    ? RestletParamSchema<JSONTypeName | "primitive" | "tuple", boolean, boolean>[]
-    : void;
-};
+> = { type: JSONType } & (IsRoot extends true
+  ? {}
+  : IsArrayElement extends true
+    ? {}
+    : {
+        param: string;
+        required: boolean;
+      }) &
+  (JSONType extends "array"
+    ? {
+        arrayType: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true>;
+      }
+    : {}) &
+  (JSONType extends "tuple"
+    ? {
+        tupleType: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true>[];
+      }
+    : {}) &
+  (JSONType extends "object"
+    ? {
+        properties: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, boolean>[];
+      }
+    : {});
 
 export const restletError = {
   missingRequiredParam: (paramName: string) =>
@@ -93,38 +106,42 @@ export function jsonType(val: JSONType): JSONTypeName {
  */
 export function validateRequestParam(
   paramValue: JSONType,
-  {
-    param,
-    type,
-    arrayType,
-    tupleType,
-    properties,
-  }: RestletParamSchema<JSONTypeName | "primitive" | "tuple", boolean, boolean>,
+  schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple", boolean, boolean>,
 ): RestletErrorResponse | null {
+  const schemaAsTupleSchema = schema as RestletParamSchema<"tuple", false, false>;
+  const schemaAsArraySchema = schema as RestletParamSchema<"array", false, false>;
+  const schemaAsObjectSchema = schema as RestletParamSchema<"object", false, false>;
+
   const paramType = jsonType(paramValue);
-  const isInvalidType = type !== "primitive" && type !== "tuple" && paramType !== type;
+  const isInvalidType = schema.type !== "primitive" && schema.type !== "tuple" && paramType !== schema.type;
   const isInvalidPrimitive =
-    (type as "primitive") === "primitive" && !["string", "number", "boolean", "null"].includes(paramType);
-  const isInvalidTuple = (type as "tuple") === "tuple" && paramType !== "array";
+    (schema.type as "primitive") === "primitive" && !["string", "number", "boolean", "null"].includes(paramType);
+  const isInvalidTuple = (schema.type as "tuple") === "tuple" && paramType !== "array";
   if (isInvalidType || isInvalidPrimitive || isInvalidTuple) {
-    return restletError.wrongParamType(param ?? "[root or array member]", paramType, type);
+    return restletError.wrongParamType(
+      (schema as RestletParamSchema<"object", false, false>).param ?? "[root or array member]",
+      paramType,
+      schema.type,
+    );
   }
 
-  if ((type as "tuple") === "tuple") {
-    for (const [index, schema] of tupleType!.entries()) {
+  if ((schema.type as "tuple") === "tuple") {
+    for (const [index, tupleSchema] of schemaAsTupleSchema.tupleType.entries()) {
       const tupleValueAtIndex = (paramValue as JSONType[])[index];
       if (tupleValueAtIndex === undefined) {
-        return restletError.missingRequiredParam(`${param ?? "[root or array member]"} tuple, index ${index}`);
+        return restletError.missingRequiredParam(
+          `${schemaAsObjectSchema.param ?? "[root or array member]"} tuple, index ${index}`,
+        );
       }
 
-      const validationError = validateRequestParam(tupleValueAtIndex, schema);
+      const validationError = validateRequestParam(tupleValueAtIndex, tupleSchema);
       if (validationError) {
         return validationError;
       }
     }
   } else if (paramType === "array") {
     for (const nestedParamValue of paramValue as JSONType[]) {
-      const validationError = validateRequestParam(nestedParamValue, arrayType!);
+      const validationError = validateRequestParam(nestedParamValue, schemaAsArraySchema.arrayType!);
       if (validationError) {
         return validationError;
       }
@@ -134,14 +151,21 @@ export function validateRequestParam(
   } else if (paramType === "object") {
     const nestedParams = Object.entries(paramValue as { [param: string]: JSONType });
 
-    for (const nestedSchema of properties!) {
-      if (!(nestedSchema.param! in (paramValue as Object)) && nestedSchema.required) {
-        return restletError.missingRequiredParam(nestedSchema.param!);
+    for (const nestedSchema of schemaAsObjectSchema.properties) {
+      const nestedSchemaAsPropertySchema = nestedSchema as RestletParamSchema<
+        JSONTypeName | "primitive" | "tuple",
+        false,
+        false
+      >;
+      if (!(nestedSchemaAsPropertySchema.param! in (paramValue as Object)) && nestedSchemaAsPropertySchema.required) {
+        return restletError.missingRequiredParam(nestedSchemaAsPropertySchema.param!);
       }
     }
 
     for (const [nestedParam, nestedParamValue] of nestedParams) {
-      const nestedParamSchema = properties!.find(prop => prop.param === nestedParam);
+      const nestedParamSchema = schemaAsObjectSchema.properties.find(
+        prop => (prop as RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, false>).param === nestedParam,
+      );
       if (!nestedParamSchema) {
         return restletError.wrongParamName(nestedParam);
       }
