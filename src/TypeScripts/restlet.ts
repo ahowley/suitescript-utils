@@ -31,7 +31,7 @@ export type RestletParamSchema<
 > = {
   param: IsRoot extends true ? void : IsArrayElement extends true ? void : string;
   type: JSONType;
-  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName | "primitive", boolean, true> : void;
+  arrayType: JSONType extends "array" ? RestletParamSchema<JSONTypeName | "primitive", false, true> : void;
   properties: JSONType extends "object" ? RestletParamSchema<JSONTypeName | "primitive", boolean, boolean>[] : void;
   required: IsArrayElement extends true ? void : boolean;
 };
