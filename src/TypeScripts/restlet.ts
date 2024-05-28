@@ -53,29 +53,35 @@ export type RestletParamSchema<
     : {});
 
 export const restletError = {
-  missingRequiredParam: (paramName: string) =>
-    ({
-      status: 400,
-      name: "Request Error - Missing Required Parameter",
-      message: `The parameter '${paramName}' was missing from the request, but is required for this endpoint.`,
-    }) as RestletErrorResponse,
-  wrongParamName: (paramName: string) => ({
+  missingRequiredParam: (paramName: string): RestletErrorResponse => ({
+    status: 400,
+    name: "Request Error - Missing Required Parameter",
+    message: `The parameter '${paramName}' was missing from the request, but is required for this endpoint.`,
+  }),
+  wrongParamName: (paramName: string): RestletErrorResponse => ({
     status: 400,
     name: "Request Error - Invalid Parameter Name",
     message: `The parameter with name '${paramName}' was unexpected in this request.`,
   }),
-  wrongParamType: (paramName: string, paramTypeName: string, expectedTypeName: string) =>
-    ({
-      status: 400,
-      name: "Request Error - Incorrect Parameter Type",
-      message: `The parameter '${paramName}' has the type '${paramTypeName}', but was expected to have the type '${expectedTypeName}' instead.`,
-    }) as RestletErrorResponse,
-  asResponse: (status: number, { name, message }: { name: string; message: string }) => ({
-    status,
-    name,
-    message,
+  wrongParamType: (paramName: string, paramTypeName: string, expectedTypeName: string): RestletErrorResponse => ({
+    status: 400,
+    name: "Request Error - Incorrect Parameter Type",
+    message: `The parameter '${paramName}' has the type '${paramTypeName}', but was expected to have the type '${expectedTypeName}' instead.`,
   }),
-};
+  asResponse: (error: any, status?: number): RestletErrorResponse => {
+    const name = error?.name;
+    const message = error?.message;
+    if (status !== undefined && [name, message].every(errorComponent => typeof errorComponent === "string")) {
+      return { status, name, message };
+    }
+
+    return {
+      status: 500,
+      name: "NG_UNKNOWN_ERROR",
+      message: "Something unexpected went wrong in the RESTlet endpoint.",
+    };
+  },
+} satisfies { [errorType: string]: (...args: any) => RestletErrorResponse };
 
 /**
  * Similar to `typeof value`, but with enough detail to cover all possible JSON value types, including arrays and objects.
