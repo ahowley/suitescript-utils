@@ -17,13 +17,15 @@ export function logAndSuppressError(logTitle: string, err: error.SuiteScriptErro
   let logDetails = "An error has occurred.";
 
   try {
-    const name: string = typeof err?.name === "string" ? err.string : "Unknown error";
+    const name: string = typeof err?.name === "string" && err.name?.length > 0 ? err.name : "Unknown error";
     logDetails = `${logDetails} #### name: ${name}`;
-    const message: string = typeof err?.message === "string" ? err.message : "An unknown error occurred";
+    const message: string =
+      typeof err?.message === "string" && err.message?.length > 0 ? err.message : "An unknown error occurred";
     logDetails = `${logDetails} #### message: ${message}`;
     const cause: string = JSON.stringify(err?.cause ?? "Unknown cause");
     logDetails = `${logDetails} #### cause: ${cause}`;
-    const stack: string[] = !!err?.stack?.length && typeof err.stack[0] === "string" ? err.stack : [];
+    const stack: string[] =
+      !!err?.stack?.length && typeof err?.stack[0] === "string" && typeof err?.stack !== "string" ? err.stack : [];
     logDetails = `${logDetails} #### stack: ${stack.join(" | ")}`;
 
     log.error(logTitle, logDetails);
