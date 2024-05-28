@@ -70,6 +70,11 @@ export const restletError = {
       name: "Request Error - Incorrect Parameter Type",
       message: `The parameter '${paramName}' has the type '${paramTypeName}', but was expected to have the type '${expectedTypeName}' instead.`,
     }) as RestletErrorResponse,
+  asResponse: (status: number, { name, message }: { name: string; message: string }) => ({
+    status,
+    name,
+    message,
+  }),
 };
 
 /**
