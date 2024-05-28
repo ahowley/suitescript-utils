@@ -120,12 +120,20 @@ export function jsonType(val: JSONType): JSONTypeName {
  * - i.e. arrayType is only needed for "array"s, tupleType for "tuple"s, and properties for "object"s, etc.
  */
 export function validateRequestParam(
-  paramValue: JSONType,
+  paramValue: JSONType | undefined,
   schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple", boolean, boolean>,
 ): RestletErrorResponse | null {
   const schemaAsTupleSchema = schema as RestletParamSchema<"tuple", false, false>;
   const schemaAsArraySchema = schema as RestletParamSchema<"array", false, false>;
   const schemaAsObjectSchema = schema as RestletParamSchema<"object", false, false>;
+
+  if (paramValue === undefined) {
+    if (schemaAsObjectSchema.required) {
+      return restletError.missingRequiredParam(schemaAsObjectSchema.param ?? "[root or array member]");
+    }
+
+    return null;
+  }
 
   const paramType = jsonType(paramValue);
   const isInvalidType = schema.type !== "primitive" && schema.type !== "tuple" && paramType !== schema.type;
