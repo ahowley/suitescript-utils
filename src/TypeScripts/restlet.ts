@@ -7,7 +7,13 @@
 
 import { throwError } from "./errors";
 
-export type RestletSuccessfulResponse<T extends { [key: string]: string | number | boolean | null }> = {
+export type JSONPrimitive = string | number | boolean | null;
+
+export type JSONObject = { [key: string]: JSONPrimitive | JSONObject | JSONArray };
+
+export type JSONArray = (JSONPrimitive | JSONObject | JSONArray)[];
+
+export type RestletSuccessfulResponse<T extends JSONObject> = {
   status: number;
   data: T;
 };
@@ -17,8 +23,6 @@ export type RestletErrorResponse = {
   name: string;
   message: string;
 };
-
-export type JSONPrimitive = string | number | boolean | null;
 
 export type JSONType = JSONPrimitive | JSONType[] | { [key: string]: JSONType };
 
