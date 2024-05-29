@@ -118,4 +118,14 @@ export const throwError = {
       `A value that was supposed to be unique instead appeared at least twice. Name: ${nameOfDuplicate} | Duplicate Value: ${valueOfDuplicate}`,
     );
   },
+  /**
+   * Raise this type of error when a value that should be readonly attempts to be overwritten.
+   * @param nameOfReadOnlyValue - The name of the field or other value that should be readonly.
+   */
+  readOnly: (nameOfReadOnlyValue: string) => {
+    return createAndThrowError(
+      "NG_READONLY",
+      `An update or change was attempted for a value that is supposed to be read-only: ${nameOfReadOnlyValue}`,
+    );
+  },
 };
