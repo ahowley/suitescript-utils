@@ -119,13 +119,14 @@ export const throwError = {
     );
   },
   /**
-   * Raise this type of error when a value that should be readonly attempts to be overwritten.
-   * @param nameOfReadOnlyValue - The name of the field or other value that should be readonly.
+   * Raise this type of error when a value is accessed in a way that is disallowed.
+   * @param nameOfValue - The name of the field or other value that should be readonly.
+   * @param nameOfMissingPermission - The permission that is missing, but necessary.
    */
-  readOnly: (nameOfReadOnlyValue: string) => {
+  noPermission: (nameOfValue: string, nameOfMissingPermission: string) => {
     return createAndThrowError(
       "NG_READONLY",
-      `An update or change was attempted for a value that is supposed to be read-only: ${nameOfReadOnlyValue}`,
+      `A read, update, or change was attempted on the following value, without necessary permission '${nameOfMissingPermission}': ${nameOfValue}`,
     );
   },
 };
