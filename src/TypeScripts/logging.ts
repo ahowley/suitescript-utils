@@ -26,7 +26,7 @@ export function debugLog<Func extends (...args: any[]) => any>(
     const result: ReturnType<Func> = func(...args);
     log.debug(
       `${logTitlePrefix ? logTitlePrefix + " - " : ""}${func.name} returned`,
-      `Returning result from ${func.name}. Remaining usage: ${remainingUsage()}`,
+      `Returning result from ${func.name}: ${result}. Remaining usage: ${remainingUsage()}`,
     );
 
     return result;
