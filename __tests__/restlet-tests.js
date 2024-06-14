@@ -67,6 +67,11 @@ const TEST_PARAM_SCHEMA = {
       ],
       required: false,
     },
+    {
+      param: "valuesparam",
+      type: "values",
+      values: ["hello", "world", "foo", "bar"],
+    },
   ],
 };
 
@@ -89,6 +94,7 @@ describe("request param validation", () => {
       },
       arrayparam: [2, 3, 4],
       tupleparam: [5, ["foo", "bar", "baz"]],
+      valuesparam: "foo",
     };
 
     // when
@@ -196,6 +202,34 @@ describe("request param validation", () => {
       name: "Request Error - Incorrect Parameter Type",
       message:
         "The parameter 'primitiveparam' has the type 'array', but was expected to have the type 'primitive' instead.",
+    });
+  });
+
+  it("should return wrongParamType if 'values' param value is not in accepted value list", () => {
+    // given
+    const schema = { ...TEST_PARAM_SCHEMA };
+    const invalidParams = {
+      stringparam: "foo",
+      numberparam: 1,
+      booleanparam: true,
+      nullparam: null,
+      primitiveparam: true,
+      objectparam: {
+        nestedarrayparam: ["bar", "baz"],
+      },
+      arrayparam: [2, 3, 4],
+      tupleparam: [5, ["foo", "bar", "baz"]],
+      valuesparam: "baz",
+    };
+
+    // when
+    const validationError = validateRequestParam(invalidParams, schema);
+
+    //then
+    expect(validationError).toEqual({
+      status: 400,
+      name: "Request Error - Incorrect Parameter Value",
+      message: `The parameter 'valuesparam' with the value 'baz' was not found in the expected value list: '["hello","world","foo","bar"]'`,
     });
   });
 

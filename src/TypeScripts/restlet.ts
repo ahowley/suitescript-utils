@@ -29,10 +29,10 @@ export type JSONType = JSONPrimitive | JSONType[] | { [key: string]: JSONType };
 export type JSONTypeName = "string" | "number" | "boolean" | "null" | "object" | "array";
 
 export type RestletParamSchema<
-  JSONType extends JSONTypeName | "primitive" | "tuple",
+  Type extends JSONTypeName | "primitive" | "tuple" | "values",
   IsRoot extends boolean,
   IsArrayElement extends boolean,
-> = { type: JSONType } & (IsRoot extends true
+> = { type: Type } & (IsRoot extends true
   ? {}
   : IsArrayElement extends true
     ? {}
@@ -40,19 +40,24 @@ export type RestletParamSchema<
         param: string;
         required: boolean;
       }) &
-  (JSONType extends "array"
+  (Type extends "array"
     ? {
-        arrayType: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true>;
+        arrayType: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values", false, true>;
       }
     : {}) &
-  (JSONType extends "tuple"
+  (Type extends "tuple"
     ? {
-        tupleType: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, true>[];
+        tupleType: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values", false, true>[];
       }
     : {}) &
-  (JSONType extends "object"
+  (Type extends "object"
     ? {
-        properties: RestletParamSchema<JSONTypeName | "primitive" | "tuple", false, boolean>[];
+        properties: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values", false, boolean>[];
+      }
+    : {}) &
+  (Type extends "values"
+    ? {
+        values: JSONPrimitive[];
       }
     : {});
 
@@ -71,6 +76,15 @@ export const restletError = {
     status: 400,
     name: "Request Error - Incorrect Parameter Type",
     message: `The parameter '${paramName}' has the type '${paramTypeName}', but was expected to have the type '${expectedTypeName}' instead.`,
+  }),
+  wrongParamValue: (
+    paramName: string,
+    paramValue: JSONType,
+    expectedParamValues: JSONPrimitive[],
+  ): RestletErrorResponse => ({
+    status: 400,
+    name: "Request Error - Incorrect Parameter Value",
+    message: `The parameter '${paramName}' with the value '${paramValue}' was not found in the expected value list: '${JSON.stringify(expectedParamValues)}'`,
   }),
   asResponse: (error: any, status?: number): RestletErrorResponse => {
     const name = error?.name;
@@ -121,11 +135,12 @@ export function jsonType(val: JSONType): JSONTypeName {
  */
 export function validateRequestParam(
   paramValue: JSONType | undefined,
-  schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple", boolean, boolean>,
+  schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values", boolean, boolean>,
 ): RestletErrorResponse | null {
   const schemaAsTupleSchema = schema as RestletParamSchema<"tuple", false, false>;
   const schemaAsArraySchema = schema as RestletParamSchema<"array", false, false>;
   const schemaAsObjectSchema = schema as RestletParamSchema<"object", false, false>;
+  const schemaAsValuesSchema = schema as RestletParamSchema<"values", false, false>;
 
   if (paramValue === undefined) {
     if (schemaAsObjectSchema.required) {
@@ -140,12 +155,16 @@ export function validateRequestParam(
   const isInvalidPrimitive =
     (schema.type as "primitive") === "primitive" && !["string", "number", "boolean", "null"].includes(paramType);
   const isInvalidTuple = (schema.type as "tuple") === "tuple" && paramType !== "array";
-  if (isInvalidType || isInvalidPrimitive || isInvalidTuple) {
-    return restletError.wrongParamType(
-      (schema as RestletParamSchema<"object", false, false>).param ?? "[root or array member]",
-      paramType,
-      schema.type,
+  const isInvalidValue =
+    schema.type === "values" && !schemaAsValuesSchema.values?.includes(paramValue as JSONPrimitive);
+  if (isInvalidValue) {
+    return restletError.wrongParamValue(
+      schemaAsObjectSchema.param ?? "[root or array member]",
+      paramValue,
+      schemaAsValuesSchema.values,
     );
+  } else if (schema.type !== "values" && (isInvalidType || isInvalidPrimitive || isInvalidTuple)) {
+    return restletError.wrongParamType(schemaAsObjectSchema.param ?? "[root or array member]", paramType, schema.type);
   }
 
   if ((schema.type as "tuple") === "tuple") {
