@@ -1,4 +1,4 @@
-import { validateRequestParam, restletError } from "../src/FileCabinet/SuiteScripts/utils/restlet";
+import { validateRequestParam } from "../src/FileCabinet/SuiteScripts/utils/restlet";
 
 const TEST_PARAM_SCHEMA = {
   type: "object",
@@ -72,6 +72,21 @@ const TEST_PARAM_SCHEMA = {
       type: "values",
       values: ["hello", "world", "foo", "bar"],
     },
+    {
+      param: "overloadedparam",
+      type: "overloaded",
+      overloads: [
+        {
+          type: "string",
+        },
+        {
+          type: "array",
+          arrayType: {
+            type: "number",
+          },
+        },
+      ],
+    },
   ],
 };
 
@@ -95,6 +110,7 @@ describe("request param validation", () => {
       arrayparam: [2, 3, 4],
       tupleparam: [5, ["foo", "bar", "baz"]],
       valuesparam: "foo",
+      overloadedparam: [2, 3, 4],
     };
 
     // when
@@ -205,7 +221,35 @@ describe("request param validation", () => {
     });
   });
 
-  it("should return wrongParamType if 'values' param value is not in accepted value list", () => {
+  it("should return wrongParamType if overloaded parameter is fed an incorrect type", () => {
+    // given
+    const schema = { ...TEST_PARAM_SCHEMA };
+    const invalidParams = {
+      stringparam: "foo",
+      numberparam: 1,
+      booleanparam: true,
+      nullparam: null,
+      primitiveparam: 2,
+      objectparam: {
+        nestedarrayparam: ["bar", "baz"],
+      },
+      arrayparam: [2, 3, 4],
+      overloadedparam: ["test"],
+    };
+
+    // when
+    const validationError = validateRequestParam(invalidParams, schema);
+
+    //then
+    expect(validationError).toEqual({
+      status: 400,
+      name: "Request Error - Incorrect Parameter Type",
+      message:
+        "The parameter 'overloadedparam' has the type 'array', but was expected to have the type 'string | array (number)' instead.",
+    });
+  });
+
+  it("should return wrongParamValue if 'values' param value is not in accepted value list", () => {
     // given
     const schema = { ...TEST_PARAM_SCHEMA };
     const invalidParams = {
