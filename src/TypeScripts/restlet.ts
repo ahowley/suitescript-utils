@@ -5,7 +5,9 @@
  * This module contains common utilities pertaining to RESTlet scripts, including context/request validation.
  */
 
+import log from "N/log";
 import { throwError } from "./errors";
+import { debugLog } from "./logging";
 
 export type JSONPrimitive = string | number | boolean | null;
 
@@ -129,7 +131,7 @@ export function jsonType(val: JSONType): JSONTypeName {
 /**
  * Validate that the type of a value matches its expected type.
  */
-function validateRequestParamType(
+export function validateRequestParamType(
   paramValue: JSONType,
   schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values" | "overloaded", boolean, boolean>,
 ): RestletErrorResponse | null {
@@ -195,7 +197,7 @@ function validateRequestParamType(
  * @param schema - An object representing this value's expected type. Everything but the "type" property is conditionally optional
  * - i.e. arrayType is only needed for "array"s, tupleType for "tuple"s, and properties for "object"s, etc.
  */
-export function validateRequestParam(
+export const validateRequestParam = debugLog(function validateRequestParam(
   paramValue: JSONType | undefined,
   schema: RestletParamSchema<JSONTypeName | "primitive" | "tuple" | "values" | "overloaded", boolean, boolean>,
 ): RestletErrorResponse | null {
@@ -249,7 +251,7 @@ export function validateRequestParam(
     }
 
     return null;
-  } else if (paramType === "object") {
+  } else if (paramType === "object" && schema.type !== "overloaded") {
     const nestedParams = Object.entries(paramValue as { [param: string]: JSONType });
 
     for (const nestedSchema of schemaAsObjectSchema.properties) {
@@ -258,7 +260,11 @@ export function validateRequestParam(
         false,
         false
       >;
-      if (!(nestedSchemaAsPropertySchema.param! in (paramValue as Object)) && nestedSchemaAsPropertySchema.required) {
+      if (
+        !!nestedSchemaAsPropertySchema.param &&
+        !(nestedSchemaAsPropertySchema.param in (paramValue as Object)) &&
+        nestedSchemaAsPropertySchema.required
+      ) {
         return restletError.missingRequiredParam(nestedSchemaAsPropertySchema.param!);
       }
     }
@@ -279,4 +285,4 @@ export function validateRequestParam(
   }
 
   return null;
-}
+});

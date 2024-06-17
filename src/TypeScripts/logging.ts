@@ -21,7 +21,7 @@ export function debugLog<Func extends (...args: any[]) => any>(
   return (...args: Parameters<Func>) => {
     log.debug(
       `${logTitlePrefix ? logTitlePrefix + " - " : ""}${func.name} invoked`,
-      `Calling function ${func.name}. Remaining usage: ${remainingUsage()} | args: ${JSON.stringify(args.map(arg => `${Object.keys(arg)[0]} = ${arg}`))}`,
+      `Calling function ${func.name}. Remaining usage: ${remainingUsage()} | args: ${JSON.stringify(args)}`,
     );
     const result: ReturnType<Func> = func(...args);
     log.debug(

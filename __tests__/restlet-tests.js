@@ -1,4 +1,9 @@
+import log from "N/log";
+import runtime from "N/runtime";
 import { validateRequestParam } from "../src/FileCabinet/SuiteScripts/utils/restlet";
+
+jest.mock("N/log");
+jest.mock("N/runtime");
 
 const TEST_PARAM_SCHEMA = {
   type: "object",
@@ -92,6 +97,12 @@ const TEST_PARAM_SCHEMA = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  log.debug = jest.fn((title, details) => console.log(title, details));
+  runtime.getCurrentScript.mockReturnValue({
+    getRemainingUsage() {
+      return 500;
+    },
+  });
 });
 
 describe("request param validation", () => {
